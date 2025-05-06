@@ -1,19 +1,19 @@
 argparse			check | | |
 base64				check |
-bs4 (beautiful soup)		check | |
+bs4 (beautiful soup)check | |
 datetime			check |
 - email
 - fnmatch
 - glob
 - http
-- image_viewer
+- image_viewer      -> screenshot maken webscraper
 - itertools
 json				check |
-os				check | | | | | | |
+os			    	check | | | | | | |
 paramiko			check |
 pathlib				check |
 random				check | |
-re				check | | | |
+re				    check | | | |
 requests			check | | |
 scapy				check |
 - selenium
@@ -21,7 +21,7 @@ scapy				check |
 shutil				check | |
 socket				check |
 subprocess			check |
-sys				check | | | |
+sys				    check | | | |
 threading			check |
 time				check | |
 

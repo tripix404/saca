@@ -8,7 +8,7 @@ from pathlib import path
 import platform
 
 def sace_results(data, filename="scan_results"):
-    """ opslagen van resultaten in een JSON-bestand """"
+    """ opslagen van resultaten in een JSON-bestand """
 
     timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     safe_name = base64.b64encode(f"{filename}_{timestamp}".encode()).decode()
@@ -66,4 +66,3 @@ def arp_scan(target_ip="192.168.1.0/24"):
         print(f"[-] Kritieke fout tijdens ARP-scan: {str(e)}")
         print("[+] Voer het script uit als Administrator en of controleer je firewall instellingen")
         return []
-        
