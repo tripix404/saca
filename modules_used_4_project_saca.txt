@@ -1,0 +1,36 @@
+argparse			check | | |
+base64				check |
+bs4 (beautiful soup)		check | |
+datetime			check |
+- email
+- fnmatch
+- glob
+- http
+- image_viewer
+- itertools
+json				check |
+os				check | | | | | | |
+paramiko			check |
+pathlib				check |
+random				check | |
+re				check | | | |
+requests			check | | |
+scapy				check |
+- selenium
+- send2trash
+shutil				check | |
+socket				check |
+subprocess			check |
+sys				check | | | |
+threading			check |
+time				check | |
+
+------------------------------------------
+------------------------------------------
+not covered modules
+------------------------------------------
+logging 			check |
+urllib				check | | |
+ctypes				check |
+unittest 			check | | | |
+platform 			check | | |

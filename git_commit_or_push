@@ -1,0 +1,15 @@
+create new project on gitlab in students folder
+uncheck make .readme file, now you can see instructions
+go to your local machine and make a folder in the correct place
+open this folder with vscode
+open terminal in vscode and run:
+
+python -m venv .venv
+run git setup commands
+
+git init --initial-branch=main
+git remote add origin [url]                 (as seen on gitlab instructions)
+git add .
+git commit -m "initial commit"
+git push --set-upstream origin main
+now you can work in this

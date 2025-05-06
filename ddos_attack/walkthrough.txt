@@ -1,0 +1,37 @@
+# Start Apache op alternatieve poort 8080 (kali linux)
+sudo systemctl stop apache2
+sudo sed -i 's/Listen 80/Listen 8080/' /etc/apache2/ports.conf
+sudo systemctl start apache2
+
+# Controleer of poort open staat
+sudo netstat -tulpn | grep 8080
+
+# Gebruik htop om cpu belasting te kunnen analyseren
+sudo apt install htop
+htop
+
+Ook de commando 
+sudo tcpdump -ni any port 8080 and udp
+om het netwerkverkeer te analyseren, specifiek UDP pakketten op poort 8080
+
+
+
+
+
+
+
+
+
+
+
+Ik start mijn script op.
+
+Ik heb een confirmatie input geïmplementeerd waarom ja moet ingegeven worden, anders stopt de script.
+
+Voor de variabele van de target_ip heb ik het ip adres ingegeven van mijn virtuele machine (kali)
+
+de poort heb ik ook aangepast naar 8080 voor de apache2 server op mijn vm
+Ik heb de waarden voor de variabelen "packets_total", "rate_pps" en "num_streams"
+moeten verhogen zodat je via HTOP het cpu verbruik ziet omhoog gaan.
+
+

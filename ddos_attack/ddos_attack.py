@@ -8,6 +8,7 @@ import sys
 # ──────────────────────────────────────────────────────────────────────────────
 # Bevestiging vóór uitvoering
 # ──────────────────────────────────────────────────────────────────────────────
+
 confirm = input("Bevestig dat je in een gecontroleerde omgeving werkt (ja/nee): ")
 if confirm.strip().lower() != "ja":
     print("[!] Uitvoering geannuleerd. Zorg dat je in een veilige testomgeving zit.")
@@ -16,14 +17,14 @@ if confirm.strip().lower() != "ja":
 # ──────────────────────────────────────────────────────────────────────────────
 # CONFIGURATIE (HARD‑CODED)
 # ──────────────────────────────────────────────────────────────────────────────
-TARGET_IP        = "192.168.1.1"   # Lokaal IP‑adres van de test‑server
+TARGET_IP        = "192.168.160.141"   # Lokaal IP‑adres van de test‑server
 TARGET_PORT      = 8080            # Doel‑poort
-PACKETS_TOTAL    = 1000            # Totaal aantal pakketten dat je wilt sturen
-RATE_PPS         = 100             # Totaal pakketten per seconde over alle streams
-NUM_STREAMS      = 2               # Aantal parallelle streams (threads)
+PACKETS_TOTAL    = 9000            # Totaal aantal pakketten dat je wilt sturen
+RATE_PPS         = 1000             # Totaal pakketten per seconde over alle streams
+NUM_STREAMS      = 120               # Aantal parallelle streams (threads)
 
 # Payload‑grootte range voor randomisatie (in bytes)
-MIN_PAYLOAD_SIZE = 64
+MIN_PAYLOAD_SIZE = 1024
 MAX_PAYLOAD_SIZE = 1500
 
 # Protocol‑camouflage: zet op True om een DNS‑header voor te doen
