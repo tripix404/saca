@@ -1,77 +1,46 @@
 import os
 import sys
-import importlib.util
+import subprocess
 
 def clear_screen():
     """Clear the terminal screen."""
     os.system('cls' if os.name == 'nt' else 'clear')
 
-def import_script(script_path):
-    """Import a Python script as a module."""
-    spec = importlib.util.spec_from_file_location("module", script_path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-def run_ddos_attack():
-    """Run the DDoS attack script."""
-    print("\nStarting DDoS Attack Tool...\n")
-    script_path = os.path.join("ddos_attack", "ddos_attack.py")
+def run_script(script_path):
+    """Run a Python script using subprocess."""
+    print(f"\nStarting {script_path}...\n")
     try:
-        module = import_script(script_path)
-        # If the script has a main function, call it
-        if hasattr(module, "main"):
-            module.main()
-        # Otherwise, the script was executed during import
-    except Exception as e:
-        print(f"Error running DDoS attack script: {e}")
-    input("\nPress Enter to return to main menu...")
-
-def run_web_scraper():
-    """Run the web scraper script."""
-    print("\nStarting Web Scraper Tool...\n")
-    script_path = os.path.join("web_scraper", "web_scraper.py")
-    try:
-        module = import_script(script_path)
-        # If the script has a main function, call it
-        if hasattr(module, "main"):
-            module.main()
-        # Otherwise, the script was executed during import
-    except Exception as e:
-        print(f"Error running Web Scraper script: {e}")
-    input("\nPress Enter to return to main menu...")
-
-def run_mac_spoofer():
-    """Run the MAC spoofer script."""
-    print("\nStarting MAC Spoofer Tool...\n")
-    script_path = os.path.join("mac_spoof", "mac_spoof.py")
-    try:
-        module = import_script(script_path)
-        # If the script has a main function, call it
-        if hasattr(module, "main"):
-            module.main()
-        # Otherwise, the script was executed during import
-    except Exception as e:
-        print(f"Error running MAC spoofer script: {e}")
-    input("\nPress Enter to return to main menu...")
-
-def run_arp_scanner():
-    """Run the ARP scanner script."""
-    print("\nStarting ARP Scanner Tool...\n")
-    script_path = os.path.join("arp_scanner", "arp_scanner.py")
-    try:
-        module = import_script(script_path)
-        # If the script has a main function, call it
-        if hasattr(module, "main"):
-            module.main()
-        # Otherwise, the script was executed during import
-    except Exception as e:
-        print(f"Error running ARP scanner script: {e}")
+        subprocess.run([sys.executable, script_path], check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Error running script: {e}")
+    except FileNotFoundError:
+        print(f"Script not found: {script_path}")
     input("\nPress Enter to return to main menu...")
 
 def display_menu():
     """Display the main menu of the ethical hacking toolkit."""
     clear_screen()
+    banner = r"""
+                                                 
+                                                 
+.d8888b   8888b.   .d8888b  8888b.               
+88K          "88b d88P"        "88b              
+"Y8888b. .d888888 888      .d888888              
+     X88 888  888 Y88b.    888  888              
+ 88888P' "Y888888  "Y8888P "Y888888              
+                                                 
+                                                 
+                                                 
+888                      888 888      d8b 888    
+888                      888 888      Y8P 888    
+888                      888          888    
+888888  .d88b.   .d88b.  888 888  888 888 888888 
+888    d88""88b d88""88b 888 888 .88P 888 888    
+888    888  888 888  888 888 888888K  888 888    
+Y88b.  Y88..88P Y88..88P 888 888 "88b 888 Y88b.  
+ "Y888  "Y88P"   "Y88P"  888 888  888 888  "Y888
+"""
+    print(banner)
     print("=" * 50)
     print("        ETHICAL HACKING TOOLKIT - HOWEST")
     print("=" * 50)
@@ -89,13 +58,13 @@ def main():
         choice = display_menu()
         
         if choice == "1":
-            run_ddos_attack()
+            run_script(os.path.join("ddos_attack", "ddos_attack.py"))
         elif choice == "2":
-            run_web_scraper()
+            run_script(os.path.join("web_scraper", "web_scraper.py"))
         elif choice == "3":
-            run_mac_spoofer()
+            run_script(os.path.join("mac_spoof", "mac_spoof.py"))
         elif choice == "4":
-            run_arp_scanner()
+            run_script(os.path.join("arp_scanner", "arp_scanner.py"))
         elif choice == "0":
             print("\nBedankt voor het gebruiken van de Ethical Hacking Toolkit. Tot ziens!")
             break
