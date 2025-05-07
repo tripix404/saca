@@ -36,28 +36,24 @@ logging.basicConfig(
 )
 
 def save_results(data: Dict, filename: str = "scan_results") -> None:
-    """Sla resultaat op in de huidige folder."""
+    """Opslaan van resultaten met automatische opschoning"""
     try:
-        # Gebruik de huidige werkmap
-        current_dir = Path.cwd()
-        
+        results_dir = Path("./results")
+        results_dir.mkdir(parents=True, exist_ok=True)
+
+        # Verwijder oudere bestanden
+        json_files = sorted(results_dir.glob("*.json"), key=lambda f: f.stat().st_mtime, reverse=True)
+        for old_file in json_files[MAX_HISTORY_FILES:]:
+            try:
+                old_file.unlink()
+                logging.debug(f"Verwijderd: {old_file.name}")
+            except Exception as e:
+                logging.error(f"Verwijderen mislukt: {str(e)}")
+
         # Genereer bestandsnaam
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         safe_name = base64.b64encode(f"{filename}_{timestamp}".encode()).decode()
-        output_path = current_dir / f"{safe_name}.json"
-
-        # Schrijf data
-        with output_path.open('w', encoding='utf-8') as f:
-            json.dump({
-                "timestamp": timestamp,
-                "data": data
-            }, f, indent=2, default=str)
-
-        logging.info(f"Resultaten opgeslagen: {output_path.resolve()}")
-
-    except Exception as e:
-        logging.error(f"Opslagfout: {str(e)}")
-
+        output_path = results_dir / f"{safe_name}.json"
 
         # Schrijf data
         with output_path.open('w') as f:
