@@ -1,8 +1,0 @@
-{
-  "timestamp": "20250507_212944",
-  "data": {
-    "arp_scan": [],
-    "open_ports": {},
-    "ssh_bruteforce": false
-  }
-}

