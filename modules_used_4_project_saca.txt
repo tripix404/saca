@@ -34,3 +34,7 @@ urllib				check | | |
 ctypes				check |
 unittest 			check | | | |
 platform 			check | | |
+typing 		        check |
+asyncio     		check |
+concurrent          check |
+
