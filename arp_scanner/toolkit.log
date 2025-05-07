@@ -1,0 +1,82 @@
+2025-05-07 21:28:59,095 - INFO - Subnetmasker toegevoegd: 192.168.176.1/24
+2025-05-07 21:28:59,095 - INFO - ARP-scan initialiseren...
+2025-05-07 21:28:59,095 - INFO - Beschikbare interfaces:
+2025-05-07 21:28:59,095 - INFO -   0: vEthernet (WSL (Hyper-V firewall)) - IP: 172.24.16.1
+2025-05-07 21:28:59,095 - INFO -   1: Bluetooth-netwerkverbinding - IP: 169.254.45.90
+2025-05-07 21:28:59,095 - INFO -   2: Wi-Fi - IP: 192.168.50.137
+2025-05-07 21:28:59,095 - INFO -   3: VMware Network Adapter VMnet8 - IP: 192.168.160.1
+2025-05-07 21:28:59,095 - INFO -   4: VMware Network Adapter VMnet1 - IP: 192.168.176.1
+2025-05-07 21:28:59,095 - INFO -   5: Wi-Fi 4 - IP: 169.254.172.8
+2025-05-07 21:28:59,095 - INFO -   6: Wi-Fi 3 - IP: 169.254.102.142
+2025-05-07 21:28:59,095 - INFO -   7: Ethernet - IP: 192.168.50.250
+2025-05-07 21:28:59,095 - INFO -   8: \Device\NPF_Loopback - IP: 127.0.0.1
+2025-05-07 21:28:59,095 - INFO -   9: Ethernet 2 - IP: 169.254.201.57
+2025-05-07 21:28:59,095 - INFO -   10: OpenVPN Connect DCO Adapter - IP: 169.254.252.207
+2025-05-07 21:28:59,111 - INFO -   11: LAN-verbinding - IP: 169.254.153.213
+2025-05-07 21:29:18,444 - INFO - Scannen van 192.168.176.1/24 via Ethernet 2...
+2025-05-07 21:29:44,369 - WARNING - Geen apparaten gevonden - controleer:
+2025-05-07 21:29:44,370 - WARNING - - Interface/IP combinatie
+2025-05-07 21:29:44,370 - WARNING - - Firewall instellingen
+2025-05-07 21:29:44,370 - WARNING - - Netwerkverbinding
+2025-05-07 21:29:44,370 - INFO - Resultaten opgeslagen in C:\Users\georg\Desktop\HoWest\saca\saca_project\arp_scanner\results\c2Nhbl9yZXN1bHRzXzIwMjUwNTA3XzIxMjk0NA==.json
+2025-05-07 21:31:13,295 - INFO - Subnetmasker toegevoegd: 192.168.176.1/24
+2025-05-07 21:31:13,295 - INFO - ARP-scan initialiseren...
+2025-05-07 21:31:13,295 - INFO - Beschikbare interfaces:
+2025-05-07 21:31:13,295 - INFO -   0: vEthernet (WSL (Hyper-V firewall)) - IP: 172.24.16.1
+2025-05-07 21:31:13,295 - INFO -   1: Bluetooth-netwerkverbinding - IP: 169.254.45.90
+2025-05-07 21:31:13,295 - INFO -   2: Wi-Fi - IP: 192.168.50.137
+2025-05-07 21:31:13,295 - INFO -   3: VMware Network Adapter VMnet8 - IP: 192.168.160.1
+2025-05-07 21:31:13,295 - INFO -   4: VMware Network Adapter VMnet1 - IP: 192.168.176.1
+2025-05-07 21:31:13,295 - INFO -   5: Wi-Fi 4 - IP: 169.254.172.8
+2025-05-07 21:31:13,295 - INFO -   6: Wi-Fi 3 - IP: 169.254.102.142
+2025-05-07 21:31:13,295 - INFO -   7: Ethernet - IP: 192.168.50.250
+2025-05-07 21:31:13,295 - INFO -   8: \Device\NPF_Loopback - IP: 127.0.0.1
+2025-05-07 21:31:13,295 - INFO -   9: Ethernet 2 - IP: 169.254.201.57
+2025-05-07 21:31:13,295 - INFO -   10: OpenVPN Connect DCO Adapter - IP: 169.254.252.207
+2025-05-07 21:31:13,295 - INFO -   11: LAN-verbinding - IP: 169.254.153.213
+2025-05-07 21:31:14,847 - INFO - Scannen van 192.168.176.1/24 via Ethernet 2...
+2025-05-07 21:31:40,816 - WARNING - Geen apparaten gevonden - controleer:
+2025-05-07 21:31:40,817 - WARNING - - Interface/IP combinatie
+2025-05-07 21:31:40,817 - WARNING - - Firewall instellingen
+2025-05-07 21:31:40,817 - WARNING - - Netwerkverbinding
+2025-05-07 21:31:40,817 - INFO - Resultaten opgeslagen in C:\Users\georg\Desktop\HoWest\saca\saca_project\arp_scanner\results\c2Nhbl9yZXN1bHRzXzIwMjUwNTA3XzIxMzE0MA==.json
+2025-05-07 21:31:50,867 - INFO - Subnetmasker toegevoegd: 192.168.176.1/24
+2025-05-07 21:31:50,883 - INFO - ARP-scan initialiseren...
+2025-05-07 21:31:50,883 - INFO - Beschikbare interfaces:
+2025-05-07 21:31:50,883 - INFO -   0: vEthernet (WSL (Hyper-V firewall)) - IP: 172.24.16.1
+2025-05-07 21:31:50,883 - INFO -   1: Bluetooth-netwerkverbinding - IP: 169.254.45.90
+2025-05-07 21:31:50,883 - INFO -   2: Wi-Fi - IP: 192.168.50.137
+2025-05-07 21:31:50,883 - INFO -   3: VMware Network Adapter VMnet8 - IP: 192.168.160.1
+2025-05-07 21:31:50,883 - INFO -   4: VMware Network Adapter VMnet1 - IP: 192.168.176.1
+2025-05-07 21:31:50,883 - INFO -   5: Wi-Fi 4 - IP: 169.254.172.8
+2025-05-07 21:31:50,883 - INFO -   6: Wi-Fi 3 - IP: 169.254.102.142
+2025-05-07 21:31:50,883 - INFO -   7: Ethernet - IP: 192.168.50.250
+2025-05-07 21:31:50,883 - INFO -   8: \Device\NPF_Loopback - IP: 127.0.0.1
+2025-05-07 21:31:50,883 - INFO -   9: Ethernet 2 - IP: 169.254.201.57
+2025-05-07 21:31:50,883 - INFO -   10: OpenVPN Connect DCO Adapter - IP: 169.254.252.207
+2025-05-07 21:31:50,883 - INFO -   11: LAN-verbinding - IP: 169.254.153.213
+2025-05-07 21:31:54,390 - INFO - Scannen van 192.168.176.1/24 via Ethernet...
+2025-05-07 21:32:20,452 - WARNING - Geen apparaten gevonden - controleer:
+2025-05-07 21:32:20,452 - WARNING - - Interface/IP combinatie
+2025-05-07 21:32:20,457 - WARNING - - Firewall instellingen
+2025-05-07 21:32:20,457 - WARNING - - Netwerkverbinding
+2025-05-07 21:32:20,457 - INFO - Resultaten opgeslagen in C:\Users\georg\Desktop\HoWest\saca\saca_project\arp_scanner\results\c2Nhbl9yZXN1bHRzXzIwMjUwNTA3XzIxMzIyMA==.json
+2025-05-07 21:32:38,121 - INFO - Subnetmasker toegevoegd: /24
+2025-05-07 21:32:38,121 - INFO - ARP-scan initialiseren...
+2025-05-07 21:32:38,121 - INFO - Beschikbare interfaces:
+2025-05-07 21:32:38,121 - INFO -   0: vEthernet (WSL (Hyper-V firewall)) - IP: 172.24.16.1
+2025-05-07 21:32:38,121 - INFO -   1: Bluetooth-netwerkverbinding - IP: 169.254.45.90
+2025-05-07 21:32:38,121 - INFO -   2: Wi-Fi - IP: 192.168.50.137
+2025-05-07 21:32:38,121 - INFO -   3: VMware Network Adapter VMnet8 - IP: 192.168.160.1
+2025-05-07 21:32:38,121 - INFO -   4: VMware Network Adapter VMnet1 - IP: 192.168.176.1
+2025-05-07 21:32:38,121 - INFO -   5: Wi-Fi 4 - IP: 169.254.172.8
+2025-05-07 21:32:38,121 - INFO -   6: Wi-Fi 3 - IP: 169.254.102.142
+2025-05-07 21:32:38,121 - INFO -   7: Ethernet - IP: 192.168.50.250
+2025-05-07 21:32:38,121 - INFO -   8: \Device\NPF_Loopback - IP: 127.0.0.1
+2025-05-07 21:32:38,121 - INFO -   9: Ethernet 2 - IP: 169.254.201.57
+2025-05-07 21:32:38,121 - INFO -   10: OpenVPN Connect DCO Adapter - IP: 169.254.252.207
+2025-05-07 21:32:38,121 - INFO -   11: LAN-verbinding - IP: 169.254.153.213
+2025-05-07 21:32:42,382 - INFO - Scannen van /24 via Ethernet...
+2025-05-07 21:33:08,416 - INFO - Portscan gestart voor 192.168.50.1
+2025-05-07 21:33:09,938 - WARNING - Poort 80 (http) is open
+2025-05-07 21:33:09,938 - INFO - Resultaten opgeslagen in C:\Users\georg\Desktop\HoWest\saca\saca_project\arp_scanner\results\c2Nhbl9yZXN1bHRzXzIwMjUwNTA3XzIxMzMwOQ==.json
