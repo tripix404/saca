@@ -42,7 +42,7 @@ Y88b.  Y88..88P Y88..88P 888 888 "88b 888 Y88b.
 """
     print(banner)
     print("=" * 50)
-    print("        ETHICAL HACKING TOOLKIT - HOWEST")
+    print("        ETHICAL HACKING TOOLKIT - HOWEST - by Georges Devos")
     print("=" * 50)
     print("1. DDoS Attack Tool")
     print("2. Web Scraper Tool")
