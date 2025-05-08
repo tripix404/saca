@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Verbeterde Web Scraper: web_scraper.py
---------------------------------------
+HOWEST Web Scraper
+- Maakt automatisch een map aan met domeinnaam + pad als output directory
 - Respecteert robots.txt
 - Unieke queue (geen dubbele links)
 - User-Agent header
@@ -19,6 +19,7 @@ import logging
 from urllib.parse import urljoin, urlparse, urldefrag
 import requests
 from bs4 import BeautifulSoup
+import sys
 
 logging.basicConfig(
     format='[%(asctime)s] %(levelname)s: %(message)s',
@@ -27,19 +28,26 @@ logging.basicConfig(
 
 HEADERS = {'User-Agent': 'Mozilla/5.0 (compatible; WebScraper/1.0)'}
 
+def get_safe_output_dir(start_url):
+    """Genereer veilige mapnaam gebaseerd op domein en pad"""
+    parsed = urlparse(start_url)
+    domain = parsed.netloc
+    path = parsed.path.strip('/').replace('/', '_')
+    safe_name = domain
+    if path:
+        safe_name += f"_{path}"
+    return safe_name
+
 def sanitize_filename(url):
-    """Zorg voor veilige bestandsnamen."""
     parsed = urlparse(url)
     safe = parsed.path.strip('/').replace('/', '_').replace('\\', '_')
     if not safe:
         safe = 'index'
-    # Voeg query toe als die er is, maar veilig
     if parsed.query:
         safe += '_' + re.sub(r'\W+', '_', parsed.query)
     return safe
 
 def allowed_by_robots(url, robots_txt_cache, base_url):
-    """Check robots.txt (heel basic)."""
     from urllib.robotparser import RobotFileParser
     parsed = urlparse(base_url)
     robots_url = f"{parsed.scheme}://{parsed.netloc}/robots.txt"
@@ -53,13 +61,18 @@ def allowed_by_robots(url, robots_txt_cache, base_url):
         robots_txt_cache[robots_url] = rp
     rp = robots_txt_cache[robots_url]
     if rp is None:
-        return True  # Als robots.txt niet bereikbaar is, ga door
+        return True
     return rp.can_fetch(HEADERS['User-Agent'], url)
 
 class WebScraper:
-    def __init__(self, start_url, output_dir, pattern=None, max_pages=100, text_only=False):
+    def __init__(self, start_url, output_dir=None, pattern=None, max_pages=100, text_only=False):
         self.start_url = start_url.rstrip('/')
         self.base_domain = urlparse(start_url).netloc
+        
+        # Genereer automatische mapnaam indien niet opgegeven
+        if not output_dir:
+            output_dir = get_safe_output_dir(self.start_url)
+        
         self.output_dir = output_dir
         self.pattern = re.compile(pattern, re.IGNORECASE) if pattern else None
         self.max_pages = max_pages
@@ -69,6 +82,7 @@ class WebScraper:
         self.queue_set = set(self.queue)
         self.robots_txt_cache = {}
         os.makedirs(self.output_dir, exist_ok=True)
+        logging.info(f"Output directory: {os.path.abspath(self.output_dir)}")
 
     def save_page(self, url, html, text):
         safe_name = sanitize_filename(url)
@@ -84,7 +98,6 @@ class WebScraper:
             logging.info(f"Saved TEXT: {file_txt}")
 
         if self.pattern:
-            # Zoek in zowel HTML als tekst
             matches_html = set(self.pattern.findall(html))
             matches_text = set(self.pattern.findall(text))
             matches = matches_html | matches_text
@@ -98,7 +111,6 @@ class WebScraper:
             self.queue_set.discard(url)
             if url in self.visited:
                 continue
-            # Respect robots.txt
             if not allowed_by_robots(url, self.robots_txt_cache, self.start_url):
                 logging.info(f"Disallowed by robots.txt: {url}")
                 self.visited.add(url)
@@ -127,29 +139,92 @@ class WebScraper:
             self.visited.add(url)
             count += 1
 
-            # Progress indicator
             print(f"\rProgress: {count}/{self.max_pages} pages", end='', flush=True)
 
-            # Links verzamelen
             for link in soup.find_all('a', href=True):
                 href = urljoin(url, link['href'])
-                href, _ = urldefrag(href)  # Verwijder fragment
+                href, _ = urldefrag(href)
                 parsed = urlparse(href)
                 if parsed.netloc == self.base_domain and href not in self.visited and href not in self.queue_set:
                     self.queue.append(href)
                     self.queue_set.add(href)
-            time.sleep(1)  # be gentle
+            time.sleep(1)
         print()
         logging.info("Crawling complete.")
 
+EXAMPLES = """
+Voorbeelden van gebruik:
+
+  Basis scraping (automatische mapnaam):
+    python web_scraper.py --start-url https://example.com/blog
+
+  Handmatige mapnaam:
+    python web_scraper.py --start-url https://example.com --output-dir mijn_custom_map
+"""
+
+def interactive_argument_prompt():
+    print("\nGeen argumenten opgegeven. Vul de volgende gegevens in om verder te gaan:")
+    start_url = input("Start-URL (verplicht): ").strip()
+    if not start_url:
+        print("❌ Start-URL is verplicht.")
+        sys.exit(1)
+    
+    auto_dir = get_safe_output_dir(start_url)
+    output_dir = input(f"Output directory [{auto_dir}]: ").strip() or auto_dir
+    
+    pattern = input("Regex pattern (optioneel): ").strip() or None
+    try:
+        max_pages = int(input("Maximaal aantal pagina's [100]: ").strip() or "100")
+    except ValueError:
+        max_pages = 100
+    text_only = input("Alleen tekst opslaan? (y/n) [n]: ").strip().lower() == "y"
+    return argparse.Namespace(
+        start_url=start_url,
+        output_dir=output_dir,
+        pattern=pattern,
+        max_pages=max_pages,
+        text_only=text_only
+    )
+
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Recursive Web Scraper with pattern logging")
-    parser.add_argument('--start-url', required=True, help='URL to begin crawling')
-    parser.add_argument('--output-dir', default='./dump', help='Directory to save downloaded pages')
-    parser.add_argument('--pattern', help='Regex pattern to search for in pages')
-    parser.add_argument('--max-pages', type=int, default=100, help='Maximum number of pages to crawl')
-    parser.add_argument('--text-only', action='store_true', help='Save only visible text (as .txt)')
-    args = parser.parse_args()
+    parser = argparse.ArgumentParser(
+        description="🔍 HOWEST Web Scraper - Gestructureerde website data extractie",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=EXAMPLES
+    )
+
+    required = parser.add_argument_group('Verplichte argumenten')
+    required.add_argument(
+        '--start-url',
+        required=True,
+        help="Start-URL om te crawlen (bijv. 'https://voorbeeld.nl/pagina')"
+    )
+
+    optional = parser.add_argument_group('Optionele argumenten')
+    optional.add_argument(
+        '--output-dir',
+        help="Handmatige mapnaam (default: domein + pad)")
+    optional.add_argument(
+        '--pattern',
+        help="Regex patroon om te zoeken (bijv. 'admin|password')"
+    )
+    optional.add_argument(
+        '--max-pages',
+        type=int,
+        default=100,
+        help="Maximaal aantal te crawlen pagina's (default: 100)"
+    )
+    optional.add_argument(
+        '--text-only',
+        action='store_true',
+        help="Sla alleen tekst op (geen HTML)"
+    )
+
+    if len(sys.argv) == 1:
+        parser.print_help(sys.stderr)
+        args = interactive_argument_prompt()
+    else:
+        args = parser.parse_args()
 
     scraper = WebScraper(
         start_url=args.start_url,

