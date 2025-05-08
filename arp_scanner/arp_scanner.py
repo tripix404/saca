@@ -67,8 +67,8 @@ def save_results(data: Dict, filename: str = "scan_results") -> None:
     except Exception as e:
         logging.error(f"Opslagfout: {str(e)}")
 
-def arp_scan(target_ip: str = "192.168.1.0/24") -> List[Dict[str, str]]:
-    """Geavanceerde ARP-scanner met interface detectie"""
+def arp_scan(target_ip: str = "192.168.1.0/24") -> Optional[List[Dict[str, str]]]:
+    """Geavanceerde ARP-scanner met interface detectie en terugkeeroptie"""
     logging.info("ARP-scan initialiseren...")
     
     try:
@@ -78,17 +78,21 @@ def arp_scan(target_ip: str = "192.168.1.0/24") -> List[Dict[str, str]]:
             return []
 
         # Interface selectie
-        logging.info("Beschikbare interfaces:")
+        print("\nBeschikbare interfaces:")
         for idx, iface in enumerate(available_ifaces):
-            logging.info(f"{idx}: {iface.name} - {iface.ip}")
+            print(f"[{idx}] {iface.name} - {iface.ip}")
+        print("[99] Terug naar hoofdmenu")
 
         while True:
             try:
-                choice = int(input(f"Kies interface (0-{len(available_ifaces)-1}): "))
+                choice_input = input(f"Kies interface (0-{len(available_ifaces)-1}, of 99 om terug te keren): ")
+                if choice_input == "99":
+                    return None  # Speciaal signaal voor hoofdmenu
+                choice = int(choice_input)
                 iface = available_ifaces[choice]
                 break
             except (ValueError, IndexError):
-                logging.warning("Ongeldige keuze, probeer opnieuw")
+                print("Ongeldige keuze, probeer opnieuw.")
 
         logging.info(f"Scannen van {target_ip} via {iface.name}...")
 
@@ -139,27 +143,21 @@ async def check_port(host: str, port: int) -> Optional[tuple]:
             
         return (port, service)
     except Exception:
-        return None  # Geeft expleciet None terug bij fouten
+        return None  # Geeft expliciet None terug bij fouten
 
 async def async_port_scan(host: str, ports: List[int] = None) -> Dict[int, str]:
     """Asynchrone portscanner met verbeterde foutafhandeling"""
     logging.info(f"Portscan gestart voor {host}")
     
-    # Standaard poortenlijst
     default_ports = [21, 22, 23, 80, 443, 8080, 3389, 5900]
     ports = ports[:MAX_SCAN_PORTS] if ports else default_ports
     
     open_ports = {}
-    
-    # Maak taken voor elke port
     tasks = [check_port(host, port) for port in ports]
-    
-    # Wacht op resultaten
     results = await asyncio.gather(*tasks)
     
-    # Verwerk resultaten veilig
     for result in results:
-        if result is not None:  # Expliciete check op None
+        if result is not None:
             port, service = result
             open_ports[port] = service
             logging.warning(f"Poort {port} ({service}) is open")
@@ -182,7 +180,7 @@ def ssh_bruteforce(host: str, port: int = 22, username: str = "root", max_worker
 
     def try_password(password: str) -> bool:
         try:
-            time.sleep(MIN_RATE_LIMIT)  # Rate limiting
+            time.sleep(MIN_RATE_LIMIT)
             client.connect(
                 host,
                 port=port,
@@ -226,39 +224,35 @@ async def main():
         'ssh_bruteforce': {}
     }
 
-    # ARP Scan
-    results['arp_scan'] = arp_scan(target)
+    # ARP Scan met terugkeeroptie
+    arp_result = arp_scan(target)
+    if arp_result is None:
+        print("\nTerug naar hoofdmenu...")
+        return  # Keer terug naar hoofdmenu/hoofdscript
+
+    results['arp_scan'] = arp_result
     
     if results['arp_scan']:
-        # Scan per apparaat
         for device in results['arp_scan']:
             current_ip = device['IP']
             try:
-                # Port Scan
                 results['open_ports'][current_ip] = await async_port_scan(current_ip)
-                
-                # SSH Bruteforce alleen bij open poort 22
                 if 22 in results['open_ports'][current_ip]:
                     results['ssh_bruteforce'][current_ip] = ssh_bruteforce(current_ip)
                 else:
                     results['ssh_bruteforce'][current_ip] = "Niet uitgevoerd (poort 22 gesloten)"
             except Exception as e:
                 logging.error(f"Fout bij {current_ip}: {str(e)}")
-                # Voeg foutinfo toe aan resultaten
                 if current_ip not in results['open_ports']:
                     results['open_ports'][current_ip] = {}
                 if current_ip not in results['ssh_bruteforce']:
                     results['ssh_bruteforce'][current_ip] = "Fout tijdens scan"
 
-    # Opslaan resultaten
     save_results(results)
-    
     print("\n[!] Scan voltooid. Bekijk de resultatenbestanden.")
 
 if __name__ == "__main__":
-    # Onderdruk alle TripleDES waarschuwingen voordat asyncio start
     if not sys.warnoptions:
         import os
         os.environ["PYTHONWARNINGS"] = "ignore::DeprecationWarning"
-    
     asyncio.run(main())

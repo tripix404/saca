@@ -224,3 +224,5 @@
 2025-05-08 08:07:49,950 - WARNING - Ongeldige keuze, probeer opnieuw
 2025-05-08 08:07:50,374 - CRITICAL - ARP-scan fout: 
 2025-05-08 08:07:50,381 - INFO - Resultaten opgeslagen: c2Nhbl9yZXN1bHRzXzIwMjUwNTA4XzA4MDc1MA==.json
+2025-05-08 08:12:20,592 - INFO - Subnet toegevoegd: /24
+2025-05-08 08:12:20,592 - INFO - ARP-scan initialiseren...
