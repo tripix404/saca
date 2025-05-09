@@ -55,25 +55,31 @@ def display_menu():
 888    888  888 888  888 888 888888K  888 888    
 Y88b.  Y88..88P Y88..88P 888 888 "88b 888 Y88b.  
  "Y888  "Y88P"   "Y88P"  888 888  888 888  "Y888 
+
+
 """
     try:
         width = os.get_terminal_size().columns
     except OSError:
         width = 80  # fallback
-
+    print(Style.BRIGHT + Fore.RED + Back.BLACK + "|" * width + Style.RESET_ALL)
     # Print banner gecentreerd en gekleurd
     for line in banner.splitlines():
         print(Style.BRIGHT + Fore.RED + Back.BLACK + line.center(width) + Style.RESET_ALL)
 
     # Menu gecentreerd
+    print(Style.BRIGHT + Fore.RED + Back.BLACK + "|" * width + Style.RESET_ALL)
+    print(Style.BRIGHT + Fore.MAGENTA + "_" * width + Style.RESET_ALL)
     print(Style.BRIGHT + Fore.MAGENTA + "=" * width + Style.RESET_ALL)
     print(Style.BRIGHT + Fore.YELLOW + "ETHICAL HACKING TOOLKIT - HOWEST - by Georges Devos".center(width) + Style.RESET_ALL)
+    print(Style.BRIGHT + Fore.MAGENTA + "_" * width + Style.RESET_ALL)
     print(Style.BRIGHT + Fore.MAGENTA + "=" * width + Style.RESET_ALL)
     print(Style.BRIGHT + "1. ".center(width) + Style.RESET_ALL + Fore.GREEN + "DDoS Attack Tool".center(width))
     print(Fore.GREEN + "2. Web Scraper Tool".center(width))
     print(Fore.GREEN + "3. MAC Spoofer Tool".center(width))
     print(Fore.GREEN + "4. ARP Scanner Tool".center(width))
     print(Style.BRIGHT + Fore.RED + "0. Exit".center(width))
+    print(Style.BRIGHT + Fore.MAGENTA + "_" * width + Style.RESET_ALL)
     print(Style.BRIGHT + Fore.MAGENTA + "=" * width + Style.RESET_ALL)
     # Gebruik nu center_input voor een gecentreerde prompt én cursor
     return center_input("Selecteer een tool (0-4): ")
