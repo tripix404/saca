@@ -1,6 +1,7 @@
 import os
 import sys
 import subprocess
+import time
 from colorama import init, Fore, Back, Style
 
 init(autoreset=True)
@@ -54,7 +55,7 @@ def display_menu():
 888    d88""88b d88""88b 888 888 .88P 888 888    
 888    888  888 888  888 888 888888K  888 888    
 Y88b.  Y88..88P Y88..88P 888 888 "88b 888 Y88b.  
- "Y888  "Y88P"   "Y88P"  888 888  888 888  "Y888 
+  "Y888  "Y88P"   "Y88P"  888 888  888 888  "Y888 
 
 
 """
@@ -62,19 +63,21 @@ Y88b.  Y88..88P Y88..88P 888 888 "88b 888 Y88b.
         width = os.get_terminal_size().columns
     except OSError:
         width = 80  # fallback
+    print(Style.BRIGHT + Back.BLACK + " " * width + Style.RESET_ALL)
     print(Style.BRIGHT + Fore.RED + Back.BLACK + "|" * width + Style.RESET_ALL)
     # Print banner gecentreerd en gekleurd
     for line in banner.splitlines():
         print(Style.BRIGHT + Fore.RED + Back.BLACK + line.center(width) + Style.RESET_ALL)
-
+    
     # Menu gecentreerd
     print(Style.BRIGHT + Fore.RED + Back.BLACK + "|" * width + Style.RESET_ALL)
+    print(Style.BRIGHT + Back.BLACK + " " * width + Style.RESET_ALL)
     print(Style.BRIGHT + Fore.MAGENTA + "_" * width + Style.RESET_ALL)
     print(Style.BRIGHT + Fore.MAGENTA + "=" * width + Style.RESET_ALL)
     print(Style.BRIGHT + Fore.YELLOW + "ETHICAL HACKING TOOLKIT - HOWEST - by Georges Devos".center(width) + Style.RESET_ALL)
     print(Style.BRIGHT + Fore.MAGENTA + "_" * width + Style.RESET_ALL)
     print(Style.BRIGHT + Fore.MAGENTA + "=" * width + Style.RESET_ALL)
-    print(Style.BRIGHT + "1. ".center(width) + Style.RESET_ALL + Fore.GREEN + "DDoS Attack Tool".center(width))
+    print(Style.BRIGHT + Fore.GREEN + "1. DDoS Attack Tool".center(width))
     print(Fore.GREEN + "2. Web Scraper Tool".center(width))
     print(Fore.GREEN + "3. MAC Spoofer Tool".center(width))
     print(Fore.GREEN + "4. ARP Scanner Tool".center(width))
@@ -83,6 +86,29 @@ Y88b.  Y88..88P Y88..88P 888 888 "88b 888 Y88b.
     print(Style.BRIGHT + Fore.MAGENTA + "=" * width + Style.RESET_ALL)
     # Gebruik nu center_input voor een gecentreerde prompt én cursor
     return center_input("Selecteer een tool (0-4): ")
+
+def display_thank_you():
+    """Toon een gecentreerde bedanktekst voor de lector."""
+    clear_screen()
+    try:
+        width = os.get_terminal_size().columns
+    except OSError:
+        width = 80  # fallback
+    print("\n" * 3)
+    thank_you_lines = [
+        "Bedankt voor het gebruiken van de Ethical Hacking Toolkit!",
+        "",
+        "Een bijzondere dank aan mijn lector en de coaches voor hun begeleiding en waardevolle feedback",
+        "tijdens dit project. Zonder hun steun zou dit project niet mogelijk zijn geweest.",
+        "",
+        "Dankjewel",
+        "Georges Devos"
+    ]
+    for line in thank_you_lines:
+        print(Style.BRIGHT + Fore.CYAN + line.center(width) + Style.RESET_ALL)
+    print("\n" * 3)
+    # Wacht 10 seconden voordat het programma afsluit
+    time.sleep(10)
 
 def main():
     """Main function that runs the ethical hacking toolkit."""
@@ -97,7 +123,7 @@ def main():
         elif choice == "4":
             run_script(os.path.join("arp_scanner", "arp_scanner.py"))
         elif choice == "0":
-            print("\nBedankt voor het gebruiken van de Ethical Hacking Toolkit. Tot ziens!")
+            display_thank_you()
             break
         else:
             print("\nOngeldige keuze. Probeer opnieuw.")
