@@ -16,6 +16,7 @@ import os
 import re
 import time
 import logging
+import glob  # <-- Toegevoegd voor bestandsmatching
 from urllib.parse import urljoin, urlparse, urldefrag
 import requests
 from bs4 import BeautifulSoup
@@ -148,9 +149,25 @@ class WebScraper:
                 if parsed.netloc == self.base_domain and href not in self.visited and href not in self.queue_set:
                     self.queue.append(href)
                     self.queue_set.add(href)
-            time.sleep(1)
+            time.sleep(0.1)
         print()
         logging.info("Crawling complete.")
+
+        # Toegevoegd: lijst alle tekstbestanden, pdf bestanden en jpg bestanden in de output directory
+        txt_files = glob.glob(os.path.join(self.output_dir, "*.txt"))
+        print(f"\nAangemaakte tekstbestanden ({len(txt_files)}):")
+        for txt_file in txt_files:
+            print(f"- {os.path.basename(txt_file)}")
+        
+        pdf_files = glob.glob(os.path.join(self.output_dir, "*.pdf"))
+        print(f"\nAangemaakte pdfbestanden ({len(pdf_files)}):")
+        for pdf_file in pdf_files:
+            print(f"- {os.path.basename(pdf_file)}")
+        
+        jpg_files = glob.glob(os.path.join(self.output_dir, "*.jpg"))
+        print(f"\nAangemaakte fotobestanden ({len(jpg_files)}):")
+        for jpg_file in jpg_files:
+            print(f"- {os.path.basename(jpg_file)}")
 
 EXAMPLES = """
 Voorbeelden van gebruik:
