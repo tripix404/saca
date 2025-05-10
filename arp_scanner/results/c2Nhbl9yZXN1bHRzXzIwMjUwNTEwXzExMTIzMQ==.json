@@ -1,0 +1,69 @@
+{
+  "timestamp": "20250510_111231",
+  "data": {
+    "arp_scan": [
+      {
+        "IP": "192.168.50.1",
+        "MAC": "60:cf:84:af:59:38",
+        "Interface": "Ethernet"
+      },
+      {
+        "IP": "192.168.50.11",
+        "MAC": "de:60:64:5f:cc:13",
+        "Interface": "Ethernet"
+      },
+      {
+        "IP": "192.168.50.93",
+        "MAC": "5c:aa:fd:45:5f:a8",
+        "Interface": "Ethernet"
+      },
+      {
+        "IP": "192.168.50.108",
+        "MAC": "00:17:88:63:10:64",
+        "Interface": "Ethernet"
+      },
+      {
+        "IP": "192.168.50.109",
+        "MAC": "f2:ee:22:34:30:cb",
+        "Interface": "Ethernet"
+      },
+      {
+        "IP": "192.168.50.228",
+        "MAC": "d4:f5:47:05:be:36",
+        "Interface": "Ethernet"
+      },
+      {
+        "IP": "192.168.50.242",
+        "MAC": "5c:aa:fd:45:5f:40",
+        "Interface": "Ethernet"
+      },
+      {
+        "IP": "192.168.50.250",
+        "MAC": "00:e0:4c:55:15:56",
+        "Interface": "Ethernet"
+      }
+    ],
+    "open_ports": {
+      "192.168.50.1": {
+        "80": "http"
+      },
+      "192.168.50.11": {},
+      "192.168.50.93": {},
+      "192.168.50.108": {},
+      "192.168.50.109": {},
+      "192.168.50.228": {},
+      "192.168.50.242": {},
+      "192.168.50.250": {}
+    },
+    "ssh_bruteforce": {
+      "192.168.50.1": "Niet uitgevoerd (poort 22 gesloten)",
+      "192.168.50.11": "Niet uitgevoerd (poort 22 gesloten)",
+      "192.168.50.93": "Niet uitgevoerd (poort 22 gesloten)",
+      "192.168.50.108": "Niet uitgevoerd (poort 22 gesloten)",
+      "192.168.50.109": "Niet uitgevoerd (poort 22 gesloten)",
+      "192.168.50.228": "Niet uitgevoerd (poort 22 gesloten)",
+      "192.168.50.242": "Niet uitgevoerd (poort 22 gesloten)",
+      "192.168.50.250": "Niet uitgevoerd (poort 22 gesloten)"
+    }
+  }
+}

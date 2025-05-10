@@ -121,3 +121,45 @@
 2025-05-07 21:53:51,904 - WARNING - Poort 80 (http) is open
 2025-05-07 21:53:51,904 - INFO - Portscan gestart voor 192.168.50.11
 2025-05-07 21:53:53,407 - INFO - Nieuwe resultaten opgeslagen: c2Nhbl9yZXN1bHRzXzIwMjUwNTA3XzIxNTM1Mw==.json
+2025-05-10 11:06:13,576 - INFO - Subnet toegevoegd: /24
+2025-05-10 11:06:13,576 - INFO - ARP-scan initialiseren...
+2025-05-10 11:06:23,084 - INFO - Scannen van /24 via Ethernet...
+2025-05-10 11:06:54,049 - INFO - Portscan gestart voor 192.168.50.1
+2025-05-10 11:06:55,563 - WARNING - Poort 80 (http) is open
+2025-05-10 11:06:55,563 - INFO - Portscan gestart voor 192.168.50.11
+2025-05-10 11:06:57,077 - INFO - Portscan gestart voor 192.168.50.47
+2025-05-10 11:06:58,578 - INFO - Portscan gestart voor 192.168.50.93
+2025-05-10 11:07:00,094 - INFO - Portscan gestart voor 192.168.50.108
+2025-05-10 11:07:01,599 - WARNING - Poort 80 (http) is open
+2025-05-10 11:07:01,599 - WARNING - Poort 443 (https) is open
+2025-05-10 11:07:01,599 - WARNING - Poort 8080 (onbekend) is open
+2025-05-10 11:07:01,599 - INFO - Portscan gestart voor 192.168.50.109
+2025-05-10 11:07:03,106 - INFO - Portscan gestart voor 192.168.50.137
+2025-05-10 11:07:04,617 - INFO - Resultaten opgeslagen: c2Nhbl9yZXN1bHRzXzIwMjUwNTEwXzExMDcwNA==.json
+2025-05-10 11:07:23,775 - INFO - Subnet toegevoegd: /24
+2025-05-10 11:07:23,775 - INFO - ARP-scan initialiseren...
+2025-05-10 11:07:25,034 - INFO - Scannen van /24 via Ethernet...
+2025-05-10 11:07:55,964 - INFO - Portscan gestart voor 192.168.50.1
+2025-05-10 11:07:57,478 - WARNING - Poort 80 (http) is open
+2025-05-10 11:07:57,478 - INFO - Portscan gestart voor 192.168.50.11
+2025-05-10 11:07:58,988 - INFO - Portscan gestart voor 192.168.50.47
+2025-05-10 11:08:00,496 - INFO - Portscan gestart voor 192.168.50.93
+2025-05-10 11:08:02,000 - INFO - Portscan gestart voor 192.168.50.108
+2025-05-10 11:08:03,502 - INFO - Portscan gestart voor 192.168.50.109
+2025-05-10 11:08:05,010 - INFO - Portscan gestart voor 192.168.50.250
+2025-05-10 11:08:06,524 - INFO - Portscan gestart voor 192.168.50.228
+2025-05-10 11:08:08,030 - INFO - Portscan gestart voor 192.168.50.242
+2025-05-10 11:08:09,542 - INFO - Resultaten opgeslagen: c2Nhbl9yZXN1bHRzXzIwMjUwNTEwXzExMDgwOQ==.json
+2025-05-10 11:11:41,353 - INFO - Subnet toegevoegd: /24
+2025-05-10 11:11:41,353 - INFO - ARP-scan initialiseren...
+2025-05-10 11:11:48,749 - INFO - Scannen van /24 via Ethernet...
+2025-05-10 11:12:19,797 - INFO - Portscan gestart voor 192.168.50.1
+2025-05-10 11:12:21,294 - WARNING - Poort 80 (http) is open
+2025-05-10 11:12:21,294 - INFO - Portscan gestart voor 192.168.50.11
+2025-05-10 11:12:22,807 - INFO - Portscan gestart voor 192.168.50.93
+2025-05-10 11:12:24,318 - INFO - Portscan gestart voor 192.168.50.108
+2025-05-10 11:12:25,833 - INFO - Portscan gestart voor 192.168.50.109
+2025-05-10 11:12:27,334 - INFO - Portscan gestart voor 192.168.50.228
+2025-05-10 11:12:28,843 - INFO - Portscan gestart voor 192.168.50.242
+2025-05-10 11:12:30,344 - INFO - Portscan gestart voor 192.168.50.250
+2025-05-10 11:12:31,880 - INFO - Resultaten opgeslagen: c2Nhbl9yZXN1bHRzXzIwMjUwNTEwXzExMTIzMQ==.json

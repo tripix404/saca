@@ -11,6 +11,7 @@ from pathlib import Path
 import platform
 import asyncio
 import time
+import fnmatch  # <-- Toegevoegd voor bestandsmatching
 
 # Onderdruk waarschuwingen
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -36,19 +37,19 @@ logging.basicConfig(
 )
 
 def save_results(data: Dict, filename: str = "scan_results") -> None:
-    """Opslaan van resultaten met automatische opschoning"""
+    """Opslaan van resultaten, eerst results-folder leegmaken (alleen .json)"""
     try:
         results_dir = Path("./results")
         results_dir.mkdir(parents=True, exist_ok=True)
 
-        # Verwijder oudere bestanden
-        json_files = sorted(results_dir.glob("*.json"), key=lambda f: f.stat().st_mtime, reverse=True)
-        for old_file in json_files[MAX_HISTORY_FILES:]:
-            try:
-                old_file.unlink()
-                logging.debug(f"Verwijderd: {old_file.name}")
-            except Exception as e:
-                logging.error(f"Verwijderen mislukt: {str(e)}")
+        # Verwijder ALLE .json-bestanden in de results-folder met fnmatch
+        for file in results_dir.iterdir():
+            if fnmatch.fnmatch(file.name, "*.json"):
+                try:
+                    file.unlink()
+                    logging.debug(f"Verwijderd oud resultaat: {file.name}")
+                except Exception as e:
+                    logging.error(f"Verwijderen mislukt: {str(e)}")
 
         # Genereer bestandsnaam
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
