@@ -5,14 +5,16 @@ import re
 import os
 import sys
 import ctypes
+import time
+from typing import List, Tuple
 
 if platform.system().lower() == "windows":
     import winreg
 
-def is_windows():
+def is_windows() -> bool:
     return platform.system().lower() == "windows"
 
-def check_admin():
+def check_admin() -> bool:
     if is_windows():
         try:
             return ctypes.windll.shell32.IsUserAnAdmin()
@@ -21,11 +23,14 @@ def check_admin():
     else:
         return os.geteuid() == 0
 
-def generate_valid_mac():
-    first_byte = random.randint(0x00, 0xFE) & 0xFE
-    return ":".join(f"{random.randint(0x00, 0xFF):02x}" for _ in range(6)).upper()
+def generate_valid_mac() -> str:
+    first_byte = random.randint(0x02, 0xFE) | 0b00000010  # Lokaal beheerd
+    return ":".join(
+        [f"{first_byte:02X}"] + 
+        [f"{random.randint(0x00, 0xFF):02X}" for _ in range(5)]
+    )
 
-def run_command(command, shell=False):
+def run_command(command: list, shell: bool = False) -> str:
     try:
         result = subprocess.run(
             command,
@@ -38,10 +43,9 @@ def run_command(command, shell=False):
         )
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
-        print(f"❌ Fout: {e.stderr}")
-        return None
+        return ""
 
-def get_adapters():
+def get_adapters() -> List[Tuple[str, str, str, str]]:
     adapters = []
     if is_windows():
         try:
@@ -53,99 +57,102 @@ def get_adapters():
                         with winreg.OpenKey(root_key, subkey_name) as subkey:
                             try:
                                 name = winreg.QueryValueEx(subkey, "DriverDesc")[0]
+                                component_id = winreg.QueryValueEx(subkey, "ComponentId")[0].lower()
+                                guid = winreg.QueryValueEx(subkey, "NetCfgInstanceId")[0]
+                                
+                                if any(s in component_id for s in ["tap", "virtual", "vmxnet", "vpn", "wan"]):
+                                    continue
+                                
                                 try:
                                     mac = winreg.QueryValueEx(subkey, "NetworkAddress")[0]
                                 except FileNotFoundError:
                                     mac = "Geen MAC geregistreerd"
-                                adapters.append((name, subkey_name, mac))
+                                
+                                adapters.append((name, subkey_name, guid, mac))
                             except FileNotFoundError:
                                 continue
         except Exception as e:
-            print(f"❌ Windows fout: {e}")
-    else:
-        try:
-            output = run_command(["ip", "-o", "link", "show"])
-            if output:
-                for line in output.splitlines():
-                    if "loopback" not in line:
-                        match = re.search(r"\d+: ([^:]+):.*link/ether ([\da-fA-F:]+)", line)
-                        if match:
-                            adapters.append((match.group(1), match.group(2)))
-        except Exception as e:
-            print(f"❌ Linux fout: {e}")
+            print(f"❌ Registry fout: {str(e)}")
     return adapters
 
-def change_mac(interface, new_mac):
-    if is_windows():
-        try:
-            key_path = fr"SYSTEM\CurrentControlSet\Control\Class\{{4D36E972-E325-11CE-BFC1-08002BE10318}}\{interface}"
-            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path, 0, winreg.KEY_WRITE) as key:
-                winreg.SetValueEx(key, "NetworkAddress", 0, winreg.REG_SZ, new_mac.replace(':', ''))
-                run_command(["powershell", "Restart-NetAdapter", "-Name", interface], shell=True)
-                return True
-        except Exception as e:
-            print(f"❌ Windows fout: {e}")
-            return False
-    else:
-        try:
-            run_command(["ip", "link", "set", "dev", interface, "down"])
-            run_command(["ip", "link", "set", "dev", interface, "address", new_mac])
-            run_command(["ip", "link", "set", "dev", interface, "up"])
-            return True
-        except Exception as e:
-            print(f"❌ Linux fout: {e}")
-            return False
+def verify_mac_change(guid: str, expected_mac: str) -> bool:
+    try:
+        key_path = fr"SYSTEM\CurrentControlSet\Control\Class\{{4D36E972-E325-11CE-BFC1-08002BE10318}}\{guid}"
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path) as key:
+            current_mac = winreg.QueryValueEx(key, "NetworkAddress")[0]
+            return current_mac.replace(':', '').upper() == expected_mac.replace(':', '').upper()
+    except:
+        return False
+
+def change_mac(interface_key: str, new_mac: str, guid: str) -> bool:
+    try:
+        # Schrijf MAC naar registry
+        key_path = fr"SYSTEM\CurrentControlSet\Control\Class\{{4D36E972-E325-11CE-BFC1-08002BE10318}}\{interface_key}"
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path, 0, winreg.KEY_WRITE) as key:
+            winreg.SetValueEx(key, "NetworkAddress", 0, winreg.REG_SZ, new_mac.replace(':', ''))
+        
+        # Herstart adapter via GUID (meer betrouwbaar dan naam)
+        ps_commands = [
+            f'Disable-NetAdapter -InterfaceGuid "{guid}" -Confirm:$false',
+            f'Enable-NetAdapter -InterfaceGuid "{guid}"'
+        ]
+        
+        for cmd in ps_commands:
+            result = run_command(["powershell", "-Command", cmd])
+            if "No MSFT_NetAdapter" in result:
+                run_command(f'netsh interface set interface "{guid}" admin=disable', shell=True)
+                time.sleep(1)
+                run_command(f'netsh interface set interface "{guid}" admin=enable', shell=True)
+                break
+        
+        # Verifieer wijziging
+        time.sleep(3)
+        return verify_mac_change(interface_key, new_mac)
+        
+    except Exception as e:
+        print(f"❌ Kritieke fout: {str(e)}")
+        return False
 
 def interactive_mode():
-    """Interactieve modus met terugkeeroptie"""
     if not check_admin():
-        print("⚠️ Draai dit script als administrator/sudo!")
+        print("⚠️ Draai als administrator!")
         return
 
     adapters = get_adapters()
     if not adapters:
-        print("❌ Geen interfaces gevonden")
+        print("❌ Geen compatibele adapters gevonden")
         return
 
     print("\nBeschikbare netwerkinterfaces:")
-    for idx, adapter in enumerate(adapters):
-        if is_windows():
-            name, subkey, mac = adapter
-            print(f"[{idx}] {name} - Huidig MAC: {mac}")
-        else:
-            name, mac = adapter
-            print(f"[{idx}] {name} - Huidig MAC: {mac}")
+    for idx, (name, _, _, mac) in enumerate(adapters):
+        print(f"[{idx}] {name.ljust(40)} - Huidig MAC: {mac}")
     
-    print("\n[99] Terug naar hoofdmenu")
+    print("\n[99] Afsluiten")
 
     try:
-        user_input = input("\nKies een interface nummer (of 99 om terug te keren): ")
-        if user_input == "99":
+        choice = input("\nKeuze: ").strip()
+        if choice == "99":
             return
         
-        choice = int(user_input)
-        if choice < 0 or choice >= len(adapters):
-            print("❌ Ongeldige keuze")
-            return
-    except ValueError:
-        print("❌ Voer een geldig nummer in")
+        choice_idx = int(choice)
+        selected = adapters[choice_idx]
+    except:
+        print("❌ Ongeldige invoer")
         return
 
-    interface = adapters[choice][1] if is_windows() else adapters[choice][0]
-    
-    new_mac = input("Voer MAC-adres in (leeg voor willekeurig): ").strip()
+    new_mac = input("Voer MAC in (leeg = willekeurig): ").strip()
     if not new_mac:
         new_mac = generate_valid_mac()
-        print(f"Generated MAC: {new_mac}")
-
-    if not re.match(r"^([0-9A-F]{2}:){5}[0-9A-F]{2}$", new_mac, re.IGNORECASE):
-        print("❌ Ongeldig MAC-formaat")
+        print(f"Gegenereerde MAC: {new_mac}")
+    elif not re.match(r"^([0-9A-F]{2}:){5}[0-9A-F]{2}$", new_mac, re.I):
+        print("❌ Ongeldig formaat!")
         return
 
-    if change_mac(interface, new_mac):
-        print(f"✅ MAC succesvol gewijzigd naar {new_mac}")
+    if change_mac(selected[1], new_mac, selected[2]):
+        print(f"\n✅ Succes! Nieuwe MAC: {new_mac}")
+        print("⚠️ Mogelijk moet je de netwerkverbinding handmatig herstarten")
     else:
-        print("❌ Wijzigen mislukt")
+        print("\n❌ Wijziging mislukt - Controleer administratorrechten")
 
 if __name__ == "__main__":
     interactive_mode()

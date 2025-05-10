@@ -3,8 +3,8 @@ base64				check |
 bs4 (beautiful soup)check | |
 datetime			check |
 - email
-- fnmatch
-- glob
+- fnmatch           check |
+- glob              check |
 - http**
 - image_viewer      -> screenshot maken webscraper
 - itertools

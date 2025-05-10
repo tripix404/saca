@@ -98,8 +98,7 @@ def display_thank_you():
     thank_you_lines = [
         "Bedankt voor het gebruiken van de Ethical Hacking Toolkit!",
         "",
-        "Een bijzondere dank aan mijn lector en de coaches voor hun begeleiding en waardevolle feedback",
-        "tijdens dit project. Zonder hun steun zou dit project niet mogelijk zijn geweest.",
+        "Een bijzondere dank aan mijn lector en de coaches voor hun begeleiding en feedback.",
         "",
         "Dankjewel",
         "Georges Devos"
@@ -108,7 +107,7 @@ def display_thank_you():
         print(Style.BRIGHT + Fore.CYAN + line.center(width) + Style.RESET_ALL)
     print("\n" * 3)
     # Wacht 10 seconden voordat het programma afsluit
-    time.sleep(10)
+    time.sleep(4)
 
 def main():
     """Main function that runs the ethical hacking toolkit."""
