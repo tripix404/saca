@@ -3,10 +3,8 @@ import os
 import sys
 
 # Zorg dat de parent directory in sys.path staat zodat modules gevonden worden
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'ddos_attack')))
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-PARENT_DIR = os.path.abspath(os.path.join(SCRIPT_DIR, ".."))
-if PARENT_DIR not in sys.path:
-    sys.path.insert(0, PARENT_DIR)
 
 def discover_and_run_all():
     """Ontdekt en draait alle unittesten in deze map."""
