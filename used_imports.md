@@ -1,11 +1,3 @@
-<img src="https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png" class="logo" width="120"/>
-
-# Ik zou graag alle een lijst hebben van alle gebruikte imports, niet enkel de minder belangrijke of standaard imports. maar echt een volledige lijst van elke import die werd gebruikt van alle scripts
-
-Hier is een volledige lijst van **alle imports** uit alle scripts, gesorteerd in standaardbibliotheken en externe packages:
-
----
-
 ### 📦 Standaard Python Modules
 
 ```python
@@ -159,14 +151,3 @@ pip install pywin32
 3. **Performantie**
     - Scapy vereist root/admin-rechten voor raw socket toegang
     - Paramiko werkt het beste met Python 3.8+
-
-Deze lijst bevat alle gebruikte imports, inclusief indirecte afhankelijkheden via geïmporteerde modules.
-
-<div style="text-align: center">⁂</div>
-
-[^1]: paste.txt
-
-[^2]: paste-2.txt
-
-[^3]: paste-3.txt
-
