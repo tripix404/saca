@@ -12,9 +12,17 @@ if platform.system().lower() == "windows":
     import winreg
 
 def is_windows() -> bool:
+    """
+    Controleer of het script op een Windows-systeem draait.
+
+    Returns:
+        bool: True als het systeem Windows is, anders False.
+    """
     return platform.system().lower() == "windows"
 
 def check_admin() -> bool:
+    '''
+    Controleer of het script met administratorrechten draait.'''
     if is_windows():
         try:
             return ctypes.windll.shell32.IsUserAnAdmin()
@@ -24,6 +32,8 @@ def check_admin() -> bool:
         return os.geteuid() == 0
 
 def generate_valid_mac() -> str:
+    '''
+    Genereer een willekeurige, geldige MAC-adres.'''
     first_byte = random.randint(0x02, 0xFE) | 0b00000010  # Lokaal beheerd
     return ":".join(
         [f"{first_byte:02X}"] + 
@@ -31,6 +41,8 @@ def generate_valid_mac() -> str:
     )
 
 def run_command(command: list, shell: bool = False) -> str:
+    '''
+    Voer een shell-opdracht uit en retourneer de uitvoer.'''
     try:
         result = subprocess.run(
             command,
@@ -46,6 +58,8 @@ def run_command(command: list, shell: bool = False) -> str:
         return ""
 
 def get_adapters() -> List[Tuple[str, str, str, str]]:
+    '''
+    Verkrijg een lijst van netwerkadapters en hun details.'''
     adapters = []
     if is_windows():
         try:
@@ -76,6 +90,8 @@ def get_adapters() -> List[Tuple[str, str, str, str]]:
     return adapters
 
 def verify_mac_change(guid: str, expected_mac: str) -> bool:
+    '''
+    Controleer of de MAC-adreswijziging succesvol was.'''
     try:
         key_path = fr"SYSTEM\CurrentControlSet\Control\Class\{{4D36E972-E325-11CE-BFC1-08002BE10318}}\{guid}"
         with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, key_path) as key:
@@ -85,6 +101,8 @@ def verify_mac_change(guid: str, expected_mac: str) -> bool:
         return False
 
 def change_mac(interface_key: str, new_mac: str, guid: str) -> bool:
+    '''
+    Wijzig de MAC-adres van de opgegeven netwerkadapter.'''
     try:
         # Schrijf MAC naar registry
         key_path = fr"SYSTEM\CurrentControlSet\Control\Class\{{4D36E972-E325-11CE-BFC1-08002BE10318}}\{interface_key}"
