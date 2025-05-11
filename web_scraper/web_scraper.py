@@ -26,6 +26,8 @@ logging.basicConfig(
 HEADERS = {'User-Agent': 'Mozilla/5.0 (compatible; WebScraper/1.0)'}
 
 def get_safe_output_dir(start_url):
+    '''
+    Genereer een veilige naam voor de output directory op basis van de start-URL.'''
     parsed = urlparse(start_url)
     domain = parsed.netloc
     path = parsed.path.strip('/').replace('/', '_')
@@ -35,6 +37,8 @@ def get_safe_output_dir(start_url):
     return safe_name
 
 def sanitize_filename(url):
+    '''
+    Maak een veilige bestandsnaam op basis van de URL.'''
     parsed = urlparse(url)
     safe = parsed.path.strip('/').replace('/', '_').replace('\\', '_')
     if not safe:
@@ -44,6 +48,8 @@ def sanitize_filename(url):
     return safe
 
 def allowed_by_robots(url, robots_txt_cache, base_url):
+    '''
+    Controleer of de URL is toegestaan door de robots.txt van de website.'''
     from urllib.robotparser import RobotFileParser
     parsed = urlparse(base_url)
     robots_url = f"{parsed.scheme}://{parsed.netloc}/robots.txt"
@@ -61,6 +67,8 @@ def allowed_by_robots(url, robots_txt_cache, base_url):
     return rp.can_fetch(HEADERS['User-Agent'], url)
 
 class WebScraper:
+    '''
+    Een eenvoudige webscraper die pagina's crawlt en bestanden downloadt.'''
     def __init__(self, start_url, output_dir=None, 
                  download_html=False, download_text=False,
                  download_images=False, download_pdfs=False,
@@ -96,6 +104,8 @@ class WebScraper:
         logging.info(f"Output directory: {os.path.abspath(self.output_dir)}")
 
     def download_file(self, url, file_type):
+        '''
+        Download een bestand van de opgegeven URL en sla het op in de juiste map.'''
         try:
             response = requests.get(url, headers=HEADERS, timeout=10)
             response.raise_for_status()
@@ -120,6 +130,8 @@ class WebScraper:
             return False
 
     def save_page(self, url, html, text):
+        '''
+        Sla de HTML- en tekstinhoud van de pagina op in de juiste map.'''
         if self.download_html:
             safe_name = sanitize_filename(url)
             file_html = os.path.join(self.output_dir, 'html', f"{safe_name}.html")
@@ -142,6 +154,8 @@ class WebScraper:
                 logging.warning(f"Pattern '{self.pattern.pattern}' found on {url}: {matches}")
 
     def crawl(self):
+        '''
+        Start de crawl en verwerk de pagina's in de wachtrij.'''
         count = 0
         while self.queue and count < self.max_pages:
             url = self.queue.pop(0)
@@ -158,6 +172,7 @@ class WebScraper:
             logging.info(f"Crawling ({count+1}/{self.max_pages}): {url}")
             
             try:
+                ''' Skip if URL is already visited'''
                 resp = requests.get(url, headers=HEADERS, timeout=10)
                 resp.raise_for_status()
                 content_type = resp.headers.get('Content-Type', '')
@@ -191,6 +206,7 @@ class WebScraper:
                             self.download_file(img_url, 'image')
                 
                 for link in soup.find_all('a', href=True):
+                    ''' Verwerk alleen interne links'''
                     href = urljoin(url, link['href'])
                     href, _ = urldefrag(href)
                     parsed = urlparse(href)
@@ -212,6 +228,8 @@ class WebScraper:
         self.report()
 
     def report(self):
+        '''
+        Genereer een rapport van de gedownloade bestanden.'''
         print("\n=== Downloadrapport ===")
         for file_type in ['html', 'text', 'images', 'pdfs']:
             files = glob.glob(os.path.join(self.output_dir, file_type, '*'))
@@ -265,6 +283,7 @@ Kies welke bestanden je wilt downloaden:
     
     # Vraag naar aantal pagina's (nieuw!)
     while True:
+        '''Vraag naar aantal pagina's om te downloaden'''
         all_pages = input("Wil je alle pagina's downloaden? (y/n) [y]: ").strip().lower()
         if all_pages in ("", "y", "yes"):
             max_pages = 1000000  # Een groot getal, praktisch 'alles'
