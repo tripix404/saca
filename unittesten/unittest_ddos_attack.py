@@ -7,11 +7,11 @@ from io import StringIO
 # Voeg het correcte pad toe aan sys.path indien nodig
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import ddos_attack  # Verondersteld dat je script ddos_attack.py heet
+import ddos_attack 
 
 class TestDDOSAttack(unittest.TestCase):
 
-    # Bestaande tests blijven hetzelfde...
+    
 
     @patch('ddos_attack.socket.socket')
     def test_flood_basic(self, mock_socket):

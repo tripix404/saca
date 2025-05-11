@@ -6,10 +6,10 @@ import asyncio
 import os
 from pathlib import Path
 
-# Voeg het pad van de arp_scanner directory toe aan sys.path
+
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'arp_scanner')))
 
-# Nu kan arp_scanner correct geïmporteerd worden
+
 import arp_scanner
 
 class TestARPScanner(unittest.TestCase):
@@ -21,7 +21,7 @@ class TestARPScanner(unittest.TestCase):
         self.mock_iface.name = 'eth0'
         self.mock_iface.ip = '192.168.1.100'
 
-    @patch('arp_scanner.Path')  # Gecorrigeerde patch target
+    @patch('arp_scanner.Path') 
     @patch('json.dump')
     def test_save_results(self, mock_json_dump, mock_path):
         """Test dat save_results correct bestandsoperaties uitvoert"""
@@ -107,7 +107,7 @@ class TestMainFunction(IsolatedAsyncioTestCase):
     @patch('arp_scanner.arp_scan')
     @patch('arp_scanner.async_port_scan')
     @patch('arp_scanner.save_results')
-    @patch('builtins.input', return_value='192.168.1.0/24')  # Mock input hier
+    @patch('builtins.input', return_value='192.168.1.0/24') 
     async def test_main_flow(self, mock_input, mock_save, mock_scan, mock_arp):
         """Test volledige workflow"""
         mock_arp.return_value = [{'IP': '192.168.1.1'}]
