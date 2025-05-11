@@ -328,3 +328,20 @@
 2025-05-11 15:02:57,522 - INFO - Saved IMAGE: www.example.com\images\image.jpg.jpg
 2025-05-11 15:02:57,534 - INFO - Output directory: C:\Users\georg\Desktop\HoWest\saca\saca_project\unittesten\www.example.com
 2025-05-11 15:02:57,538 - INFO - Output directory: C:\Users\georg\Desktop\HoWest\saca\saca_project\unittesten\www.example.com
+2025-05-11 19:51:24,956 - INFO - ARP-scan initialiseren...
+2025-05-11 19:51:24,957 - INFO - ARP-scan initialiseren...
+2025-05-11 19:51:24,958 - ERROR - Geen bruikbare interfaces gevonden
+2025-05-11 19:51:24,959 - INFO - ARP-scan initialiseren...
+2025-05-11 19:51:24,960 - INFO - Scannen van 192.168.1.0/24 via eth0...
+2025-05-11 19:51:24,962 - INFO - Resultaten opgeslagen: <MagicMock name='Path().__truediv__().name' id='2392443680000'>
+2025-05-11 19:51:25,001 - WARNING - SSH bruteforce gestart op 192.168.1.1:22
+2025-05-11 19:51:25,001 - ERROR - passwords.txt niet gevonden!
+2025-05-11 19:51:25,041 - INFO - Output directory: C:\Users\georg\Desktop\HoWest\saca\saca_project\unittesten\www.example.com
+2025-05-11 19:51:25,761 - INFO - Crawling (1/1): https://www.example.com
+2025-05-11 19:51:25,762 - ERROR - Fout bij verwerken https://www.example.com: Error
+2025-05-11 19:51:25,764 - INFO - Output directory: C:\Users\georg\Desktop\HoWest\saca\saca_project\unittesten\www.example.com
+2025-05-11 19:51:25,834 - INFO - Crawling (1/1): https://www.example.com
+2025-05-11 19:51:26,338 - INFO - Output directory: C:\Users\georg\Desktop\HoWest\saca\saca_project\unittesten\www.example.com
+2025-05-11 19:51:26,339 - INFO - Saved IMAGE: www.example.com\images\image.jpg.jpg
+2025-05-11 19:51:26,341 - INFO - Output directory: C:\Users\georg\Desktop\HoWest\saca\saca_project\unittesten\www.example.com
+2025-05-11 19:51:26,343 - INFO - Output directory: C:\Users\georg\Desktop\HoWest\saca\saca_project\unittesten\www.example.com
