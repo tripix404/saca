@@ -1,9 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+
 # Logs
 *.log
 
-# Results / output
+# Results / generated output
 results/
 *.json
 
-# Video / grote bestanden
+# Large media files
 *.mp4
+*.mov
+*.avi
