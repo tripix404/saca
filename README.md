@@ -158,13 +158,9 @@ Verboden gebruik:
 * echte DDoS-aanvallen uitvoeren
 * gebruik in productieomgevingen
 
----
-
 ## Auteur
-
-Georges Devos
+ 
 Bachelor Cybersecurity — Howest
-
 ---
 
 ## Licentie
