@@ -1,7 +1,15 @@
-# Externe dependencies
-scapy>=2.5.0            # Voor ARP scanning en packet manipulation
-paramiko>=3.4.0         # Voor SSH bruteforce functionaliteit
-requests>=2.31.0        # Voor web scraping en HTTP requests
-beautifulsoup4>=4.12.0  # Voor HTML parsing in web scraper
-colorama>=0.4.6         # Voor kleurgebruik in terminal interfaces
-python-nmap>=0.7.1      # Voor geavanceerde port scanning (indien nodig)
+# Network / packet analysis
+scapy>=2.5.0
+
+# SSH
+paramiko>=3.4.0
+
+# Web
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+
+# CLI / UX
+colorama>=0.4.6
+
+# Scanning
+python-nmap>=0.7.1
