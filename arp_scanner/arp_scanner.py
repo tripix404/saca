@@ -31,9 +31,10 @@ MIN_RATE_LIMIT = 1.0
 # Configureer logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[logging.FileHandler('toolkit.log'), logging.StreamHandler()]
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[logging.FileHandler("toolkit.log"), logging.StreamHandler()],
 )
+
 
 def save_results(data: Dict, filename: str = "scan_results") -> None:
     """Opslaan van resultaten, eerst results-folder leegmaken (alleen .json)"""
@@ -56,16 +57,14 @@ def save_results(data: Dict, filename: str = "scan_results") -> None:
         output_path = results_dir / f"{safe_name}.json"
 
         # Schrijf data
-        with output_path.open('w') as f:
-            json.dump({
-                "timestamp": timestamp,
-                "data": data
-            }, f, indent=2, default=str)
+        with output_path.open("w") as f:
+            json.dump({"timestamp": timestamp, "data": data}, f, indent=2, default=str)
 
         logging.info(f"Resultaten opgeslagen: {output_path.name}")
 
     except Exception as e:
         logging.error(f"Opslagfout: {str(e)}")
+
 
 def arp_scan(target_ip: str = "192.168.1.0/24") -> Optional[List[Dict[str, str]]]:
     """Geavanceerde ARP-scanner met interface detectie en terugkeeroptie (zonder Bluetooth/loopback)"""
@@ -73,9 +72,10 @@ def arp_scan(target_ip: str = "192.168.1.0/24") -> Optional[List[Dict[str, str]]
     try:
         # Filter: geen Bluetooth, geen loopback
         available_ifaces = [
-            iface for iface in get_working_ifaces()
+            iface
+            for iface in get_working_ifaces()
             if iface.ip
-            and 'bluetooth' not in iface.name.lower()
+            and "bluetooth" not in iface.name.lower()
             and not iface.ip.startswith("127.")
         ]
         if not available_ifaces:
@@ -90,7 +90,9 @@ def arp_scan(target_ip: str = "192.168.1.0/24") -> Optional[List[Dict[str, str]]
 
         while True:
             try:
-                choice_input = input(f"Kies interface (0-{len(available_ifaces)-1}, of 99 om terug te keren): ")
+                choice_input = input(
+                    f"Kies interface (0-{len(available_ifaces)-1}, of 99 om terug te keren): "
+                )
                 if choice_input == "99":
                     return None  # Speciaal signaal voor hoofdmenu
                 choice = int(choice_input)
@@ -104,22 +106,15 @@ def arp_scan(target_ip: str = "192.168.1.0/24") -> Optional[List[Dict[str, str]]
         # ARP-pakket constructie
         arp_layer = ARP(pdst=target_ip)
         ether_layer = Ether(dst="ff:ff:ff:ff:ff:ff")
-        packet = ether_layer/arp_layer
+        packet = ether_layer / arp_layer
 
         # Scan uitvoeren
-        result, _ = srp(
-            packet,
-            iface=iface.name,
-            timeout=5,
-            verbose=0,
-            inter=0.1
-        )
+        result, _ = srp(packet, iface=iface.name, timeout=5, verbose=0, inter=0.1)
 
-        devices = [{
-            'IP': received.psrc,
-            'MAC': received.hwsrc,
-            'Interface': iface.name
-        } for sent, received in result]
+        devices = [
+            {"IP": received.psrc, "MAC": received.hwsrc, "Interface": iface.name}
+            for sent, received in result
+        ]
 
         if not devices:
             logging.warning("Geen apparaten gevonden - controleer netwerkinstellingen")
@@ -130,12 +125,12 @@ def arp_scan(target_ip: str = "192.168.1.0/24") -> Optional[List[Dict[str, str]]
         logging.critical(f"ARP-scan fout: {str(e)}")
         return []
 
+
 async def check_port(host: str, port: int) -> Optional[tuple]:
     """Controleer of een poort open is"""
     try:
         reader, writer = await asyncio.wait_for(
-            asyncio.open_connection(host, port),
-            timeout=1.5
+            asyncio.open_connection(host, port), timeout=1.5
         )
         writer.close()
         await writer.wait_closed()
@@ -146,6 +141,7 @@ async def check_port(host: str, port: int) -> Optional[tuple]:
         return (port, service)
     except Exception:
         return None
+
 
 async def async_port_scan(host: str, ports: List[int] = None) -> Dict[int, str]:
     """Asynchrone portscanner met verbeterde foutafhandeling"""
@@ -162,7 +158,10 @@ async def async_port_scan(host: str, ports: List[int] = None) -> Dict[int, str]:
             logging.warning(f"Poort {port} ({service}) is open")
     return open_ports
 
-def ssh_bruteforce(host: str, port: int = 22, username: str = "root", max_workers: int = 3) -> bool:
+
+def ssh_bruteforce(
+    host: str, port: int = 22, username: str = "root", max_workers: int = 3
+) -> bool:
     """Beveiligde SSH bruteforce met rate limiting"""
     logging.warning(f"SSH bruteforce gestart op {host}:{port}")
     client = paramiko.SSHClient()
@@ -183,7 +182,7 @@ def ssh_bruteforce(host: str, port: int = 22, username: str = "root", max_worker
                 username=username,
                 password=password,
                 timeout=3,
-                banner_timeout=3
+                banner_timeout=3,
             )
             logging.critical(f"SUCCESVOL: {username}:{password}")
             client.close()
@@ -202,49 +201,50 @@ def ssh_bruteforce(host: str, port: int = 22, username: str = "root", max_worker
         logging.error(f"SSH fout: {str(e)}")
         return False
 
+
 async def main():
     print("=== Ethical Hacking Toolkit ===")
     print("Alleen voor geautoriseerd gebruik!\n")
     if platform.system() == "Windows":
         print("[!] Draai als Administrator")
     target = input("Target IP/netwerk: ").strip()
-    if '/' not in target:
+    if "/" not in target:
         target += "/24"
         logging.info(f"Subnet toegevoegd: {target}")
 
-    results = {
-        'arp_scan': [],
-        'open_ports': {},
-        'ssh_bruteforce': {}
-    }
+    results = {"arp_scan": [], "open_ports": {}, "ssh_bruteforce": {}}
 
     arp_result = arp_scan(target)
     if arp_result is None:
         print("\nTerug naar hoofdmenu...")
         return
 
-    results['arp_scan'] = arp_result
-    if results['arp_scan']:
-        for device in results['arp_scan']:
-            current_ip = device['IP']
+    results["arp_scan"] = arp_result
+    if results["arp_scan"]:
+        for device in results["arp_scan"]:
+            current_ip = device["IP"]
             try:
-                results['open_ports'][current_ip] = await async_port_scan(current_ip)
-                if 22 in results['open_ports'][current_ip]:
-                    results['ssh_bruteforce'][current_ip] = ssh_bruteforce(current_ip)
+                results["open_ports"][current_ip] = await async_port_scan(current_ip)
+                if 22 in results["open_ports"][current_ip]:
+                    results["ssh_bruteforce"][current_ip] = ssh_bruteforce(current_ip)
                 else:
-                    results['ssh_bruteforce'][current_ip] = "Niet uitgevoerd (poort 22 gesloten)"
+                    results["ssh_bruteforce"][
+                        current_ip
+                    ] = "Niet uitgevoerd (poort 22 gesloten)"
             except Exception as e:
                 logging.error(f"Fout bij {current_ip}: {str(e)}")
-                if current_ip not in results['open_ports']:
-                    results['open_ports'][current_ip] = {}
-                if current_ip not in results['ssh_bruteforce']:
-                    results['ssh_bruteforce'][current_ip] = "Fout tijdens scan"
+                if current_ip not in results["open_ports"]:
+                    results["open_ports"][current_ip] = {}
+                if current_ip not in results["ssh_bruteforce"]:
+                    results["ssh_bruteforce"][current_ip] = "Fout tijdens scan"
 
     save_results(results)
     print("\n[!] Scan voltooid. Bekijk de resultatenbestanden.")
 
+
 if __name__ == "__main__":
     if not sys.warnoptions:
         import os
+
         os.environ["PYTHONWARNINGS"] = "ignore::DeprecationWarning"
     asyncio.run(main())

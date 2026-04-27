@@ -2,9 +2,13 @@ import concurrent.futures
 import subprocess
 import os
 
+
 def run_script():
-    script_path = os.path.join(os.path.dirname(__file__), "ddos_attack.py")  # Automatisch pad bepalen
+    script_path = os.path.join(
+        os.path.dirname(__file__), "ddos_attack.py"
+    )  # Automatisch pad bepalen
     subprocess.run(["python", script_path], input="ja\n", text=True)
+
 
 if __name__ == "__main__":
     with concurrent.futures.ProcessPoolExecutor(max_workers=40) as executor:

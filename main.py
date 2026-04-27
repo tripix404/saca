@@ -6,9 +6,11 @@ from colorama import init, Fore, Back, Style
 
 init(autoreset=True)
 
+
 def clear_screen():
     """Clear the terminal screen."""
-    os.system('cls' if os.name == 'nt' else 'clear')
+    os.system("cls" if os.name == "nt" else "clear")
+
 
 def run_script(script_path):
     """Run a Python script using subprocess."""
@@ -20,6 +22,7 @@ def run_script(script_path):
     except FileNotFoundError:
         print(f"Script not found: {script_path}")
     input("\nPress Enter to return to main menu...")
+
 
 def center_input(prompt):
     """Toon een gecentreerde prompt met gecentreerde cursor voor input."""
@@ -33,6 +36,7 @@ def center_input(prompt):
     sys.stdout.write(f"\033[{col+1}G{prompt}")
     sys.stdout.flush()
     return input()
+
 
 def display_menu():
     """Display the main menu of the ethical hacking toolkit."""
@@ -67,14 +71,21 @@ Y88b.  Y88..88P Y88..88P 888 888 "88b 888 Y88b.
     print(Style.BRIGHT + Fore.RED + Back.BLACK + "|" * width + Style.RESET_ALL)
     # Print banner gecentreerd en gekleurd
     for line in banner.splitlines():
-        print(Style.BRIGHT + Fore.RED + Back.BLACK + line.center(width) + Style.RESET_ALL)
-    
+        print(
+            Style.BRIGHT + Fore.RED + Back.BLACK + line.center(width) + Style.RESET_ALL
+        )
+
     # Menu gecentreerd
     print(Style.BRIGHT + Fore.RED + Back.BLACK + "|" * width + Style.RESET_ALL)
     print(Style.BRIGHT + Back.BLACK + " " * width + Style.RESET_ALL)
     print(Style.BRIGHT + Fore.MAGENTA + "_" * width + Style.RESET_ALL)
     print(Style.BRIGHT + Fore.MAGENTA + "=" * width + Style.RESET_ALL)
-    print(Style.BRIGHT + Fore.YELLOW + "ETHICAL HACKING TOOLKIT - HOWEST - by Georges Devos".center(width) + Style.RESET_ALL)
+    print(
+        Style.BRIGHT
+        + Fore.YELLOW
+        + "ETHICAL HACKING TOOLKIT - HOWEST - by Georges Devos".center(width)
+        + Style.RESET_ALL
+    )
     print(Style.BRIGHT + Fore.MAGENTA + "_" * width + Style.RESET_ALL)
     print(Style.BRIGHT + Fore.MAGENTA + "=" * width + Style.RESET_ALL)
     print(Style.BRIGHT + Fore.GREEN + "1. DDoS Attack Tool".center(width))
@@ -86,6 +97,7 @@ Y88b.  Y88..88P Y88..88P 888 888 "88b 888 Y88b.
     print(Style.BRIGHT + Fore.MAGENTA + "=" * width + Style.RESET_ALL)
     # Gebruik nu center_input voor een gecentreerde prompt én cursor
     return center_input("Selecteer een tool (0-4): ")
+
 
 def display_thank_you():
     """Toon een gecentreerde bedanktekst voor de lector."""
@@ -101,13 +113,14 @@ def display_thank_you():
         "Een bijzondere dank aan mijn lector en de coaches voor hun begeleiding en feedback.",
         "",
         "Dankjewel",
-        "Georges Devos"
+        "Georges Devos",
     ]
     for line in thank_you_lines:
         print(Style.BRIGHT + Fore.CYAN + line.center(width) + Style.RESET_ALL)
     print("\n" * 3)
     # Wacht 10 seconden voordat het programma afsluit
     time.sleep(4)
+
 
 def main():
     """Main function that runs the ethical hacking toolkit."""
@@ -127,6 +140,7 @@ def main():
         else:
             print("\nOngeldige keuze. Probeer opnieuw.")
             input("Druk op Enter om verder te gaan...")
+
 
 if __name__ == "__main__":
     main()
