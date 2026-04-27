@@ -1,0 +1,9 @@
+# Logs
+*.log
+
+# Results / output
+results/
+*.json
+
+# Video / grote bestanden
+*.mp4
